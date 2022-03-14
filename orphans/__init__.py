@@ -1,0 +1,6 @@
+"""orphans is a library of functions to simulate and analyze orphan afterglow with Rubin LSST"""
+
+try:
+    from ._version import version
+except:  #pragma: no cover
+    version = "unknown"
