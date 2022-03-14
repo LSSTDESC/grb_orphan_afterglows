@@ -1,0 +1,9 @@
+afterglowpy
+matplotlib
+numpy
+scipy
+pandas
+jupyter
+sphinx
+sphinx_rtd_theme
+seaborn

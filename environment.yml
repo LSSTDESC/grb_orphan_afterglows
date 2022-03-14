@@ -1,0 +1,14 @@
+name: orphans
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - matplotlib
+  - numpy
+  - scipy
+  - pandas
+  - jupyter
+  - sphinx
+  - sphinx_rtd_theme
+  - seaborn
