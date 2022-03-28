@@ -16,6 +16,7 @@ then
 > conda env create -f environment.yml
 > conda activate orphans
 > pip install -r requirements.txt
+> conda install markupsafe==2.0.1
 > pip install -e .
 ```
 
