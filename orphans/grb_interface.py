@@ -43,12 +43,13 @@ def make_grb_light_curve(thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
     return nu, t, Fnu_Jy
 
 
-def make_grb_spectrum(thetaObs=0.05, thetaCore=0.1, t=1.0 * grb.day2sec):
+def make_grb_spectrum(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, t=1.0 * grb.day2sec):
     """ Compute GRB SED
     1.0 * grb.day2sec is just 1 day
     """
     # For convenience, place arguments into a dict.
     Z = deepcopy(GRB_BASE_PARAMS)
+    Z['E0'] = E0
     Z['thetaObs'] = thetaObs
     Z['thetaCore'] = thetaCore
     # first create a wavelength range from 200 to 1300 nm
