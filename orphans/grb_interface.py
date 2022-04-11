@@ -14,7 +14,7 @@ from orphans.tools import flux_to_mag, get_wl_and_nu_band
 from orphans.grb_configs import GRB_BASE_PARAMS
 
 
-def make_grb_light_curve(thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
+def make_grb_light_curve(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
     """ Compute GRB light curve
 
     Note that the Flux is in mJy
@@ -26,6 +26,7 @@ def make_grb_light_curve(thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
     """
     # For convenience, place arguments into a dict.
     Z = deepcopy(GRB_BASE_PARAMS)
+    Z['E0'] = E0
     Z['thetaObs'] = thetaObs
     Z['thetaCore'] = thetaCore
 
@@ -37,26 +38,27 @@ def make_grb_light_curve(thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
     nu[:] = freq
 
     # Calculate but Fnu is in mJy by default
-    Fnu = grb.fluxDensity(t, nu, **Z)
+    fnu = grb.fluxDensity(t, nu, **Z)
     # so we convert to Jy
-    Fnu_Jy = Fnu * 1.0e-3
+    Fnu_Jy = fnu * 1.0e-3
     return nu, t, Fnu_Jy
 
 
-def make_grb_spectrum(thetaObs=0.05, thetaCore=0.1, t=1.0 * grb.day2sec):
+def make_grb_spectrum(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, t=1.0 * grb.day2sec):
     """ Compute GRB SED
     1.0 * grb.day2sec is just 1 day
     """
     # For convenience, place arguments into a dict.
     Z = deepcopy(GRB_BASE_PARAMS)
+    Z['E0'] = E0
     Z['thetaObs'] = thetaObs
     Z['thetaCore'] = thetaCore
     # first create a wavelength range from 200 to 1300 nm
     wl_full_band, freq_full_band = get_wl_and_nu_band()
     # Calculate but Fnu is in mJy by default
-    Fnu = grb.fluxDensity(t, freq_full_band, **Z)
+    fnu = grb.fluxDensity(t, freq_full_band, **Z)
     # so we convert to Jy
-    Fnu_Jy = Fnu * 1.0e-3
+    Fnu_Jy = fnu * 1.0e-3
     return wl_full_band, freq_full_band, t, Fnu_Jy
 
 
