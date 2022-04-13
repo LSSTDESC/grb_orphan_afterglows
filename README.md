@@ -30,3 +30,7 @@ then if needed, one shall also install the `rubin_sim` package as follows:
 > pip install -e .
 > cd ../orphans
 ```
+in which case, one shall follow instructions to download the scheduler data, and then set:
+```
+> export RUBIN_SIM_DATA_DIR=$MYWORKDIR/rubin_sim/rubin_sim_data"
+```
