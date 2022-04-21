@@ -23,7 +23,7 @@ test:
 
 run:
   script:
-    - python Example/agpy_test.py
+    - python scripts/agpy_test.py
 
 pages:
   script:
