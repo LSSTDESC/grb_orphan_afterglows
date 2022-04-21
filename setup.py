@@ -23,6 +23,7 @@ setup(
     install_requires=["afterglowpy",
                       "matplotlib",
                       "numpy",
+                      "astropy",
                       "scipy",
                       "pandas",
                       "seaborn",
