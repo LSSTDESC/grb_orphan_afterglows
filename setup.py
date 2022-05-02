@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="oprhans",
+    name="orphans",
     author="Johan Bregeon",
     author_email="bregeon@in2p3.fr",
     url = "https://gitlab.in2p3.fr/johan-bregeon/orphans",
@@ -23,6 +23,7 @@ setup(
     install_requires=["afterglowpy",
                       "matplotlib",
                       "numpy",
+                      "astropy",
                       "scipy",
                       "pandas",
                       "seaborn",

@@ -1,6 +1,7 @@
 afterglowpy
 matplotlib
 numpy
+astropy
 scipy
 pandas
 jupyter
