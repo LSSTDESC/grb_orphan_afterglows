@@ -4,6 +4,7 @@ numpy
 astropy
 scipy
 pandas
+pyarrow
 jupyter
 sphinx
 sphinx_rtd_theme

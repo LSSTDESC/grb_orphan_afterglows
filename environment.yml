@@ -9,6 +9,7 @@ dependencies:
   - scipy
   - astropy
   - pandas
+  - pyarrow
   - jupyter
   - sphinx
   - sphinx_rtd_theme

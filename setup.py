@@ -26,6 +26,7 @@ setup(
                       "astropy",
                       "scipy",
                       "pandas",
+                      "pyarrow",
                       "seaborn",
                       "setuptools_scm"]
 )
