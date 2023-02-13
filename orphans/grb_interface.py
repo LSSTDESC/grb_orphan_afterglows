@@ -1,8 +1,6 @@
-"""GRB Interface module
+""" GRB Interface module
 
 This module provides the main interface to afterglowpy
-
-    J. Bregeon - March 2022
 """
 
 import math
@@ -10,8 +8,8 @@ import numpy as np
 from copy import deepcopy
 import afterglowpy as grb
 
-from orphans.tools import flux_to_mag, get_wl_and_nu_band
-from orphans.grb_configs import GRB_BASE_PARAMS
+from tools import flux_to_mag, get_wl_and_nu_band
+from grb_configs import GRB_BASE_PARAMS
 
 
 def make_grb_light_curve(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
@@ -44,15 +42,18 @@ def make_grb_light_curve(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
     return nu, t, Fnu_Jy
 
 
-def make_grb_spectrum(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, t=1.0 * grb.day2sec):
+def make_grb_spectrum(E0=1.0e53, z=1, n0=1., thetaObs=0.05, thetaCore=0.1, thetaWing=0.15, t=1.0 * grb.day2sec):
     """ Compute GRB SED
     1.0 * grb.day2sec is just 1 day
     """
     # For convenience, place arguments into a dict.
     Z = deepcopy(GRB_BASE_PARAMS)
     Z['E0'] = E0
+    Z['z'] = z
+    Z['n0'] = n0
     Z['thetaObs'] = thetaObs
     Z['thetaCore'] = thetaCore
+    Z['thetaWing'] = thetaWing
     # first create a wavelength range from 200 to 1300 nm
     wl_full_band, freq_full_band = get_wl_and_nu_band()
     # Calculate but Fnu is in mJy by default
