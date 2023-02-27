@@ -18,12 +18,12 @@ from scipy.integrate import simps
 from astropy import units as u
 
 import os
-import rubin_sim.phot_utils.bandpass as Bandpass
-import rubin_sim.phot_utils.sed as Sed
+from rubin_sim.phot_utils.bandpass import Bandpass
+from rubin_sim.phot_utils.sed import Sed
 from rubin_sim.data import get_baseline
 
 from orphans.tools import ObsTime, time_coord
-from orphans.tools_rubin_sim import ComputeMags, df_obs, real_obs, GRBObsTime
+from orphans.tools_rubin_sim import compute_mags, df_obs, real_obs, GRBObsTime
 
 
 
@@ -275,7 +275,7 @@ def PicklePseudoObs(N, thetaC, path_data, jetType='PL', filename_in=None, filena
     lsst = {}
     for f in filterlist:
         lsst[f] = Bandpass()
-        lsst[f].readThroughput(os.path.join(fdir, f'total_{f}.dat'))
+        lsst[f].read_throughput(os.path.join(fdir, f'total_{f}.dat'))
 
     if filename_in == None:
         file_open = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
