@@ -28,5 +28,6 @@ setup(
                       "pandas",
                       "pyarrow",
                       "seaborn",
+                      "dustmaps",
                       "setuptools_scm"]
 )
