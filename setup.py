@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
     name="orphans",
-    author="Johan Bregeon",
-    author_email="bregeon@in2p3.fr",
+    author="Marina Masson",
+    author_email="marina.masson@lpsc.in2p3.fr",
     url = "https://gitlab.in2p3.fr/johan-bregeon/orphans",
     packages=["orphans"],
     description="Studying Gamma-ray Bursts orphan afterglow optical light curves",
