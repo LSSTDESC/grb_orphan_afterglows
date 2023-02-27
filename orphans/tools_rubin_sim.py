@@ -13,8 +13,8 @@ import pickle
 import afterglowpy as grb
 
 import os
-import rubin_sim.photUtils.Bandpass as Bandpass
-import rubin_sim.photUtils.Sed as Sed
+import rubin_sim.phot_utils.bandpass as Bandpass
+import rubin_sim.phot_utils.sed as Sed
 from rubin_sim.data import get_baseline
 
 from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum

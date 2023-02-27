@@ -18,8 +18,8 @@ from scipy.integrate import simps
 from astropy import units as u
 
 import os
-import rubin_sim.photUtils.Bandpass as Bandpass
-import rubin_sim.photUtils.Sed as Sed
+import rubin_sim.phot_utils.bandpass as Bandpass
+import rubin_sim.phot_utils.sed as Sed
 from rubin_sim.data import get_baseline
 
 from tools import ObsTime, time_coord
