@@ -22,8 +22,8 @@ import rubin_sim.phot_utils.bandpass as Bandpass
 import rubin_sim.phot_utils.sed as Sed
 from rubin_sim.data import get_baseline
 
-from tools import ObsTime, time_coord
-from tools_rubin_sim import ComputeMags, df_obs, real_obs, GRBObsTime
+from orphans.tools import ObsTime, time_coord
+from orphans.tools_rubin_sim import ComputeMags, df_obs, real_obs, GRBObsTime
 
 
 

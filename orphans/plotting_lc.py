@@ -7,7 +7,7 @@ import afterglowpy as grb
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 
-from tools import ObsTime, mag_to_flux, GalacticExtinction
+from orphans.tools import ObsTime, mag_to_flux, GalacticExtinction
 
 
 def PlotSimulation(t, fnu, flux='mag'):

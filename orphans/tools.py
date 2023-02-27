@@ -15,8 +15,6 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 from dustmaps.sfd import SFDQuery
 
-from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
-
 
 def flux_to_mag(flux):
     """ Convert flux from Jansky to AB Magnitude
