@@ -15,7 +15,7 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 from dustmaps.sfd import SFDQuery
 
-from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
+
 
 
 def flux_to_mag(flux):
@@ -130,14 +130,14 @@ def time_coord():
 
 
 
-def GalacticExtinction(coord, path_dustmaps):
+def galactic_extinction(coord, path_dustmaps):
 
     sfd = SFDQuery()
     c = SkyCoord(coord)
     ebv = sfd(c)
 
     #df = pd.read_csv('/home/masson/Documents/galactic_extinction/schlafly_dust_factor.csv', delimiter=',')
-    df = pd.read_csv(path_dustmaps, delimiter=',')
+    df = pd.read_csv(path_dustmaps, delimiter=',', skiprows=1)
     df_lsst = df[(df.Bandpass == 'LSST_u')
                  | (df.Bandpass == 'LSST_g')
                  | (df.Bandpass == 'LSST_r')
@@ -153,3 +153,38 @@ def GalacticExtinction(coord, path_dustmaps):
     a_lambda_y = ebv * df_lsst.R_V31[43]
 
     return a_lambda_u, a_lambda_g, a_lambda_r, a_lambda_i, a_lambda_z, a_lambda_y
+
+
+
+
+def pseudo_obs_with_points(pseudo_obs, n_pts=1):
+    """ Get the pseudo-observed light curves that have at least n_pts observable point(s)
+
+    Parameters
+    ----------
+    pseudo_obs: `list` of `dict`
+        pseudo-observed light curve for each configuration
+    n_pts: `int`
+        number of points on the pseudo-observed light curve. Default is 1
+
+    Returns
+    -------
+    lc_with_pts: `list` of `dict`
+        `list` of the pseudo-observed light curves that have at least n_pts observable point(s)
+    """
+
+    lc_obs = [pseudo_obs[i] for i in range(len(pseudo_obs)) if pseudo_obs[i] != 0]
+
+    lc_with_pts = []
+
+    for i in range(len(lc_obs)):
+
+        mags = np.array(lc_obs[i]['mags'])
+        mags_lim = np.array(lc_obs[i]['mags_lim'])
+
+        sub = np.subtract(mags, mags_lim)
+
+        if np.sum(np.array(sub) < 0) >= n_pts:
+            lc_with_pts.append(lc_obs[i])
+
+    return lc_with_pts
