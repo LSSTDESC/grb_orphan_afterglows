@@ -15,6 +15,8 @@ import afterglowpy as grb
 import os
 import rubin_sim.photUtils.Bandpass as Bandpass
 import rubin_sim.photUtils.Sed as Sed
+import rubin_sim.photUtils.PhotometricParameters as PhotometricParameters
+from rubin_sim.photUtils import calcMagError_m5
 from rubin_sim.data import get_baseline
 
 from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
@@ -22,7 +24,7 @@ from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
 
 
 
-def ComputeMags(i, wls, fnus, obs_t, f, lsst):
+def compute_mags(i, wls, fnus, obs_t, f, lsst):
 
     """ Compute magnitudes
     """
@@ -76,25 +78,33 @@ def df_obs(Z, df_sky, time_bins, lsst):
 
 
 
-def real_obs(obs_df, df_sky, time_bins, grb_time):
+def real_obs(obs_df, df_sky, time_bins, grb_time, lsst):
 
     """ Keep only "real" observations for the right filter
     """
-    
-    filtercolors = {'u':'b', 'g':'c', 'r':'g', 'i':'orange', 'z':'r', 'y':'m'}
-    x_times = list()
-    y_mags = list()
-    z_colors = list()
-    mags_lim = list()
+
+    filtercolors = {'u': 'b', 'g': 'c', 'r': 'g', 'i': 'orange', 'z': 'r', 'y': 'm'}
+    x_times = []
+    y_mags = []
+    z_colors = []
+    mags_lim = []
+    mags_err = []
+
     for obs_id, obs in obs_df.iterrows():
-        filt = df_sky[df_sky['observationId']==obs_id]['filter']
-        lim = df_sky[df_sky['observationId']==obs_id]['fiveSigmaDepth']
+
+        filt = df_sky[df_sky['observationId'] == obs_id]['filter']
+        lim = df_sky[df_sky['observationId'] == obs_id]['fiveSigmaDepth']
+        exptime = df_sky[df_sky['observationId'] == obs_id]['visitExposureTime']
+        nexp = df_sky[df_sky['observationId'] == obs_id]['numExposures']
+        phot_params = PhotometricParameters(exptime=exptime, nexp=nexp, readnoise=None)
         obs_t = time_bins[obs_id]
-        
+
         x_times.append(obs_t + grb_time.mjd)
         y_mags.append(obs[filt].values[0])
         z_colors.append(filtercolors[filt.values[0]])
         mags_lim.append(lim.values[0])
-        
-    return x_times, y_mags, z_colors, mags_lim
+        mags_err.append(calcMagError_m5(magnitude=obs[filt].values[0], bandpass=lsst[filt.values[0]], m5=lim.values[0],
+                                        photParams=phot_params))
+
+    return x_times, y_mags, z_colors, mags_lim, mags_err
 

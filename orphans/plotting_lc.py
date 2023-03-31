@@ -7,10 +7,13 @@ import afterglowpy as grb
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 
-from tools import ObsTime, mag_to_flux, GalacticExtinction
+from tools import ObsTime, mag_to_flux
 
 
-def PlotSimulation(t, fnu, flux='mag'):
+
+
+def plot_simulation(t, fnu, flux='mag'):
+
     """ Plot theoretical light curve of an orphan afterglow
 
     :param t: time for which the flux is calculated
@@ -45,12 +48,14 @@ def PlotSimulation(t, fnu, flux='mag'):
     plt.show()
 
 
-def PlotPseudoObs(lc, path_dustmaps, flux='mag', extinction=True):
+
+
+def plot_pseudo_obs(lc, flux='mag'):
+
     """ Plot pseudo-observed light curve of an afterglow
 
-    :param lc: dictionary containing the pseudo-observed light curve, calculated with the [...] function (in the [...] module)
+    :param lc: dictionary containing the pseudo-observed light curve, calculated with the generate_pseudo_obs function (in the pickling module)
     :param flux: whether you want to plot the flux in magnitude or in mJy. Takes the values 'mag' or 'flux', default is 'mag'
-    :param extinction: whether you want to take into account the galactic extinction or not. Takes the values 'True' or 'False', default is 'True'
 
     :return: plot of the afterglow pseudo-observed light curve
     """
@@ -63,54 +68,30 @@ def PlotPseudoObs(lc, path_dustmaps, flux='mag', extinction=True):
     x_times = lc['time']
     z_colors = lc['filt']
 
-    mags = lc['mags']
-
-    true_mags = []
-
-    coord = lc['grb_coord']
-
-    a_lambda_u, a_lambda_g, a_lambda_r, a_lambda_i, a_lambda_z, a_lambda_y = GalacticExtinction(coord, path_dustmaps)
-
-    for i in range(len(mags)):
-        if z_colors[i] == 'b':
-            true_mags.append(mags[i] + a_lambda_u)
-        elif z_colors[i] == 'c':
-            true_mags.append(mags[i] + a_lambda_g)
-        elif z_colors[i] == 'g':
-            true_mags.append(mags[i] + a_lambda_r)
-        elif z_colors[i] == 'orange':
-            true_mags.append(mags[i] + a_lambda_i)
-        elif z_colors[i] == 'r':
-            true_mags.append(mags[i] + a_lambda_z)
-        else:
-            true_mags.append(mags[i] + a_lambda_y)
-
     if flux == 'mag':
-        if extinction == True:
-            y_mags = true_mags
-        else:
-            y_mags = lc['mags']
+        y_mags = lc['mags']
         mags_lim = lc['mags_lim']
+        mags_err = lc['mags_err']
         plt.gca().invert_yaxis()
         plt.ylabel('Observed magnitude', fontsize=28)
     elif flux == 'flux':
-        if extinction == True:
-            y_mags = list(map(mag_to_flux, true_mags))
-        else:
-            y_mags = list(map(mag_to_flux, lc['mags']))
+        y_mags = list(map(mag_to_flux, lc['mags']))
         mags_lim = list(map(mag_to_flux, lc['mags_lim']))
+        mags_err = list(map(mag_to_flux, lc['mags_err']))
         plt.ylabel('Observed flux (mJy)', fontsize=28)
         plt.yscale('log')
 
     # print(x_times, y_mags, mags_lim)
 
     # plot pseudo observed light curve
-    for x, y, z, m in zip(x_times, y_mags, z_colors, mags_lim):
+    for x, y, z, m, e in zip(x_times, y_mags, z_colors, mags_lim, mags_err):
         if flux == 'mag' and y < m:
             plt.scatter(x, y, c=z, s=100)
+            plt.errorbar(x, y, e, c=z, capsize=4)
             plt.scatter(x, m, c=z, marker='2', s=100)
         elif flux == 'flux' and y > m:
             plt.scatter(x, y, c=z, s=100)
+            plt.errorbar(x, y, e, c=z, capsize=4)
             plt.scatter(x, m, c=z, marker='2', s=100)
 
     plt.title('Pseudo observed light curve', fontsize=28)

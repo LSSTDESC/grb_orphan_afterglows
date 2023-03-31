@@ -22,18 +22,18 @@ import rubin_sim.photUtils.Bandpass as Bandpass
 import rubin_sim.photUtils.Sed as Sed
 from rubin_sim.data import get_baseline
 
-from tools import ObsTime, time_coord
-from tools_rubin_sim import ComputeMags, df_obs, real_obs, GRBObsTime
+from tools import ObsTime, time_coord, galactic_extinction
+from tools_rubin_sim import compute_mags, df_obs, real_obs, GRBObsTime
 
 
 
 
-def PickleConfigs(N, jetType='PL', specType=0, b=4, p=2.2, epsilon_e=0.1, epsilon_B=0.01, xi_N=1.0, filename=None):
+def generate_configs(N, popType='realistic', specType=0, b=4, p=2.2, epsilon_e=0.1, epsilon_B=0.01, xi_N=1.0, filename=None):
 
-    """ Pickles configurations
+    """ Generate and save configurations
 
     :param N: number of configurations
-    :param jetType: type of simulated jet ('PL' for Power-Law, 'G' for Gaussian and 'TH' for Top-Hat). Default value is 'PL'
+    :param popType: type of the wanted GRB population ('realistic' for a realistic population or 'boosted' for an energy boosted population). Default value is 'realistic'
     :param specType: type of emission spectrum (0 for global cooling time + no inverse compton and 1 for global cooling time + inverse compton)
     :param filename: name of the Pickle file containing all the configurations ('configs_thetaC_N.pkl' by default)
     :other parameters: default values of the parameters of the model
@@ -62,8 +62,8 @@ def PickleConfigs(N, jetType='PL', specType=0, b=4, p=2.2, epsilon_e=0.1, epsilo
         file1 = open('../data/simulations/configs_005_' + str(N) + '.pkl', 'wb')
         file2 = open('../data/simulations/configs_015_' + str(N) + '.pkl', 'wb')
     else:
-        file1 = open(f'{filename}_005.pkl', 'wb')
-        file2 = open(f'{filename}_015.pkl', 'wb')
+        file1 = open(f'{filename}_005_{N}.pkl', 'wb')
+        file2 = open(f'{filename}_015_{N}.pkl', 'wb')
 
 
     z_range = np.linspace(0.001, 0.1, 100)
@@ -91,7 +91,12 @@ def PickleConfigs(N, jetType='PL', specType=0, b=4, p=2.2, epsilon_e=0.1, epsilo
 
         #Z['thetaObs'] = np.random.uniform(0, np.pi/2)
         Z['thetaObs'] = np.arccos(np.random.uniform(0, 1))
-        E = np.random.normal(52, 1)
+
+        if popType == 'realistic':
+            E = np.random.normal(51, 1)
+        elif popType == 'boosted':
+            E = np.random.uniform(53, 55)
+
         Z['E0'] = 1.0 * 10 ** E
         Z['n0'] = 1.0 * 10 ** (-np.random.uniform(-1, 2))
         Z['z'] = z_samples[i]
@@ -117,8 +122,9 @@ def PickleConfigs(N, jetType='PL', specType=0, b=4, p=2.2, epsilon_e=0.1, epsilo
     file2.close()
 
 
-def PickleResults(N, t, thetaC, freq=5.0e14, jetType='PL', filename_in=None, filename_out=None):
-    """ Pickles results from the configurations
+def calculate_results(N, t, thetaC, freq=5.0e14, jetType='PL', filename_in=None, filename_out=None):
+
+    """ Calculate and save some results from the configurations
 
     :param N: number of configurations
     :param t: time for which you want to calculate the light curve
@@ -224,7 +230,8 @@ def PickleResults(N, t, thetaC, freq=5.0e14, jetType='PL', filename_in=None, fil
     file.close()
 
 
-def OpenResults(N, thetaC, jetType='PL', filename=None):
+def open_results(N, thetaC, jetType='PL', filename=None):
+
     """ Shows results from the configurations
 
     :param N: number of configurations
@@ -245,11 +252,13 @@ def OpenResults(N, thetaC, jetType='PL', filename=None):
     return pd.DataFrame(configs_open)
 
 
-def PicklePseudoObs(N, thetaC, path_data, jetType='PL', filename_in=None, filename_out=None):
-    """ Pickles pseudo-observations of the lights curves
+def generate_pseudo_obs(N, thetaC, path_data, path_dustmaps, jetType='PL', filename_in=None, filename_out=None, extinction=True):
+
+    """ Generate and save pseudo-observations of the lights curves
 
     :param N: number of configurations
     :param jetType: type of simulated jet ('PL' for Power-Law, 'G' for Gaussian and 'TH' for Top-Hat). Default value is 'PL'
+    :param extinction: whether you want to take into account the galactic extinction or not. Takes the values 'True' or 'False', default is 'True'
 
     :return: 1 Pickle file containing a dictionary for each config with the configuration, the GRB coordinates and observation date, the observed magnitude, the   limiting magnitude at the observation time and the filter used at the moment of the detection
     """
@@ -293,13 +302,16 @@ def PicklePseudoObs(N, thetaC, path_data, jetType='PL', filename_in=None, filena
     else:
         file = open(f'{filename_out}.pkl', 'wb')
 
+
+    # dictionary containing all the GRB information
     LC = {'config': {},  # Dictionary Z
           'grb_time': 0,  # GRB observation date
           'grb_coord': 0,  # GRB ra/dec coordinates
           'time': [],  # Time of each detection
           'mags': [],  # Magnitude of the detection
           'filt': [],  # Filter used at the moment of the detection
-          'mags_lim': []}  # Limiting magnitude of the detection at the observation time
+          'mags_lim': [],  # Limiting magnitude of the detection at the observation time
+          'mags_err': []}   # Error on the magnitude
 
     all_LC = []
 
@@ -342,6 +354,11 @@ def PicklePseudoObs(N, thetaC, path_data, jetType='PL', filename_in=None, filena
 
         obs_list = df_obs(Z, df_sky, time_bins, lsst)
 
+        y_mags = []    # magnitude with extinction
+
+        a_lambda_u, a_lambda_g, a_lambda_r, a_lambda_i, a_lambda_z, a_lambda_y = galactic_extinction(grb_coord,
+                                                                                                    path_dustmaps)
+
         # If there is no observation, let's go to the next configuration
         if len(obs_list) == 0:
             all_LC.append(0)
@@ -352,15 +369,37 @@ def PicklePseudoObs(N, thetaC, path_data, jetType='PL', filename_in=None, filena
 
             obs_df['observationId'] = df_sky['observationId']
 
-            x_times, y_mags, z_colors, mags_lim = real_obs(obs_df, df_sky, time_bins, grb_time)
+            x_times, y_mags_without_ext, z_colors, mags_lim, mags_err = real_obs(obs_df, df_sky, time_bins, grb_time, lsst)
+
+            if extinction == True:
+
+                for i in range(len(y_mags_without_ext)):
+                    if z_colors[i] == 'b':
+                        y_mags.append(y_mags_without_ext[i] + a_lambda_u)
+                    elif z_colors[i] == 'c':
+                        y_mags.append(y_mags_without_ext[i] + a_lambda_g)
+                    elif z_colors[i] == 'g':
+                        y_mags.append(y_mags_without_ext[i] + a_lambda_r)
+                    elif z_colors[i] == 'orange':
+                        y_mags.append(y_mags_without_ext[i] + a_lambda_i)
+                    elif z_colors[i] == 'r':
+                        y_mags.append(y_mags_without_ext[i] + a_lambda_z)
+                    else:
+                        y_mags.append(y_mags_without_ext[i] + a_lambda_y)
+
+                LC['mags'] = y_mags
+
+            elif extinction == False:
+
+                LC['mags'] = y_mags_without_ext
 
             LC['config'] = Z
             LC['grb_time'] = grb_time.isot
             LC['grb_coord'] = grb_coord.to_string('hmsdms')
             LC['time'] = x_times
-            LC['mags'] = y_mags
             LC['filt'] = z_colors
             LC['mags_lim'] = mags_lim
+            LC['mags_err'] = list(np.array(mags_err)[:, 0, 0])
 
             all_LC.append(LC.copy())
 

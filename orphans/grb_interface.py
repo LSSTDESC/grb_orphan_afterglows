@@ -8,7 +8,7 @@ import numpy as np
 from copy import deepcopy
 import afterglowpy as grb
 
-from tools import flux_to_mag, get_wl_and_nu_band
+from tools import get_wl_and_nu_band
 from grb_configs import GRB_BASE_PARAMS
 
 
