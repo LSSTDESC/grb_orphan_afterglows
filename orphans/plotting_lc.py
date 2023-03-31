@@ -7,8 +7,10 @@ import afterglowpy as grb
 from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 
+<<<<<<< HEAD
 from tools import ObsTime, mag_to_flux
-
+=======
+from orphans.tools import ObsTime, mag_to_flux
 
 
 

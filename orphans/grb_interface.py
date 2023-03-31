@@ -8,8 +8,9 @@ import numpy as np
 from copy import deepcopy
 import afterglowpy as grb
 
-from tools import get_wl_and_nu_band
-from grb_configs import GRB_BASE_PARAMS
+
+from orphans.tools import flux_to_mag, get_wl_and_nu_band
+from orphans.grb_configs import GRB_BASE_PARAMS
 
 
 def make_grb_light_curve(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, freq=5.0e14):

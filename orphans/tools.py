@@ -17,7 +17,6 @@ from dustmaps.sfd import SFDQuery
 
 
 
-
 def flux_to_mag(flux):
     """ Convert flux from Jansky to AB Magnitude
 

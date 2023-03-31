@@ -18,13 +18,12 @@ from scipy.integrate import simps
 from astropy import units as u
 
 import os
-import rubin_sim.photUtils.Bandpass as Bandpass
-import rubin_sim.photUtils.Sed as Sed
+from rubin_sim.phot_utils.bandpass import Bandpass
+from rubin_sim.phot_utils.sed import Sed
 from rubin_sim.data import get_baseline
 
-from tools import ObsTime, time_coord, galactic_extinction
-from tools_rubin_sim import compute_mags, df_obs, real_obs, GRBObsTime
-
+from orphans.tools import ObsTime, time_coord,
+from orphans.tools_rubin_sim import compute_mags, df_obs, real_obs, GRBObsTime
 
 
 
@@ -284,7 +283,7 @@ def generate_pseudo_obs(N, thetaC, path_data, path_dustmaps, jetType='PL', filen
     lsst = {}
     for f in filterlist:
         lsst[f] = Bandpass()
-        lsst[f].readThroughput(os.path.join(fdir, f'total_{f}.dat'))
+        lsst[f].read_throughput(os.path.join(fdir, f'total_{f}.dat'))
 
     if filename_in == None:
         file_open = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')

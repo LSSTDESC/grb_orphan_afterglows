@@ -6,52 +6,72 @@ API Documentation for orphans
 
 Stuff
 
-lightcurve interface
-===================
+GRB interface
+=============
 
-`orphans.lightcurve`
----------------------
+`orphans.grb_interface`
+-----------------------
 
-.. automodule:: orphans.lightcurve
+.. automodule:: orphans.grb_interface
     :members:
     :undoc-members:
 
-simulator interface
-===================
+GRB Configurations interface
+============================
 
-`orphans.simulator`
+`orphans.grb_configs`
 ---------------------
 
-.. automodule:: orphans.simulator
+.. automodule:: orphans.grb_configs
     :members:
     :undoc-members:
 
-analysis interface
-==================
-
-`orphans.analysis`
----------------------
-
-.. automodule:: orphans.analysis
-    :members:
-    :undoc-members:
-
-plotter interface
-=================
-
-`orphans.plotter`
----------------------
-
-.. automodule:: orphans.plotter
-    :members:
-    :undoc-members:
-
-tools interface
+Tools interface
 ===============
 
 `orphans.tools`
----------------------
+---------------
 
 .. automodule:: orphans.tools
+    :members:
+    :undoc-members:
+
+Plotter interface
+=================
+
+`orphans.plotting_lc`
+---------------------
+
+.. automodule:: orphans.plotting_lc
+    :members:
+    :undoc-members:
+
+Tools for rubin_sim interface
+=============================
+
+`orphans.tools_rubin_sim`
+-------------------------
+
+.. automodule:: orphans.tools_rubin_sim
+    :members:
+    :undoc-members:
+
+Correlations interface
+======================
+
+`orphans.correlations`
+----------------------
+
+.. automodule:: orphans.correlations
+    :members:
+    :undoc-members:
+
+Pickle IO interface
+===================
+
+`orphans.pickling`
+------------------
+
+.. automodule:: orphans.pickling
     :members:
     :undoc-members:

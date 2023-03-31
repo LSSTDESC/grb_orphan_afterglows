@@ -13,17 +13,20 @@ import pickle
 import afterglowpy as grb
 
 import os
-import rubin_sim.photUtils.Bandpass as Bandpass
-import rubin_sim.photUtils.Sed as Sed
 import rubin_sim.photUtils.PhotometricParameters as PhotometricParameters
 from rubin_sim.photUtils import calcMagError_m5
+from rubin_sim.phot_utils.bandpass import Bandpass
+from rubin_sim.phot_utils.sed import Sed
 from rubin_sim.data import get_baseline
 
-from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
+from orphans.grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> f9e62a018d70928bbd4d9a4620c6b5a3b93e1bdb
 def compute_mags(i, wls, fnus, obs_t, f, lsst):
 
     """ Compute magnitudes
@@ -33,10 +36,10 @@ def compute_mags(i, wls, fnus, obs_t, f, lsst):
     new_grb_sed.wavelen = np.array(wls)
     new_grb_sed.fnu = np.array(fnus)
     # convert fnu to flambda
-    new_grb_sed.fnuToflambda()
+    new_grb_sed.fnu_toflambda()
     # Calculate expected AB magnitudes. 
     new_grb_mags = {}
-    new_grb_mags[str(f)] = new_grb_sed.calcMag(lsst[f])
+    new_grb_mags[str(f)] = new_grb_sed.calc_mag(lsst[f])
     # time is one column
     new_grb_mags['obs_time'] = obs_t
     # Make a dataframe just to get a nice output cell.
