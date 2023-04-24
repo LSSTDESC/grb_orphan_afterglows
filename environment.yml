@@ -10,7 +10,11 @@ dependencies:
   - astropy
   - pandas
   - pyarrow
-  - jupyter
+  - jupyterlab
+  - seaborn
+  - dustmaps
   - sphinx
   - sphinx_rtd_theme
-  - seaborn
+  - pytest-cov
+  - pylint
+  - markupsafe==2.0.1
