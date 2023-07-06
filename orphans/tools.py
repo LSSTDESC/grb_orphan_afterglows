@@ -27,7 +27,8 @@ def flux_to_mag(flux):
     :param flux: flux in milli-Jansky
     :return: mag: as the AB Magnitude
     """
-    mag = -2.5 * np.log10(flux*1.0e-23) - 48.6
+
+    mag = -2.5 * np.log10(flux*1.0e-26) - 48.6
     return mag
 
 
@@ -44,7 +45,7 @@ def mag_to_flux(mag):
     :return: flux: flux in milli-Jansky
     """
     
-    flux = pow(10, (23 - (mag + 48.6) / 2.5))
+    flux = pow(10, (26 - (mag + 48.6) / 2.5))
     return flux
 
 
