@@ -25,15 +25,15 @@ from orphans.tools import ObsTime, mag_to_flux, flux_to_mag, pseudo_obs_with_poi
 
 
 # Where to save the output files
-simu = os.environ['$SIMU']
-obs = os.environ['$OBS']
+simu = os.environ['SIMU']
+obs = os.environ['OBS']
 
 # Job ID
 job_id = os.get_env('SLURM_JOB_ID')
 
 # Where are saved the rubin_sim data and dust factor table
-rubin_sim_data = os.environ['$RUBIN_SIM_DATA']
-path_dustmaps = os.environ['$DUSTMAPS']
+rubin_sim_data = os.environ['RUBIN_SIM_DATA']
+path_dustmaps = os.environ['DUSTMAPS']
 
 
 # Parameters chosen for the GRB jet
