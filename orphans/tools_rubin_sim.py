@@ -11,22 +11,29 @@ import healpy as hp
 import numpy as np
 import pickle
 import afterglowpy as grb
+import sys
+
+#sys.path.append('/pbs/home/m/mmasson/lsst/rubin_sim')
 
 import os
+#import photUtils.PhotometricParameters as PhotometricParameters
+#from photUtils import calcMagError_m5
+#from photUtils.Bandpass import Bandpass
+#from photUtils.Sed import Sed
+#from data import get_baseline
 import rubin_sim.photUtils.PhotometricParameters as PhotometricParameters
 from rubin_sim.photUtils import calcMagError_m5
-from rubin_sim.phot_utils.bandpass import Bandpass
-from rubin_sim.phot_utils.sed import Sed
+from rubin_sim.photUtils.Bandpass import Bandpass
+from rubin_sim.photUtils.Sed import Sed
 from rubin_sim.data import get_baseline
 
+#sys.path.append('/pbs/home/m/mmasson/lsst/orphans/orphans')
+
 from orphans.grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
+#from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
 
 
-<<<<<<< HEAD
 
-
-=======
->>>>>>> f9e62a018d70928bbd4d9a4620c6b5a3b93e1bdb
 def compute_mags(i, wls, fnus, obs_t, f, lsst):
 
     """ Compute magnitudes
@@ -36,10 +43,10 @@ def compute_mags(i, wls, fnus, obs_t, f, lsst):
     new_grb_sed.wavelen = np.array(wls)
     new_grb_sed.fnu = np.array(fnus)
     # convert fnu to flambda
-    new_grb_sed.fnu_toflambda()
+    new_grb_sed.fnuToflambda()
     # Calculate expected AB magnitudes. 
     new_grb_mags = {}
-    new_grb_mags[str(f)] = new_grb_sed.calc_mag(lsst[f])
+    new_grb_mags[str(f)] = new_grb_sed.calcMag(lsst[f])
     # time is one column
     new_grb_mags['obs_time'] = obs_t
     # Make a dataframe just to get a nice output cell.
@@ -67,7 +74,7 @@ def df_obs(Z, df_sky, time_bins, lsst):
     
     Fnu_Jy = dict()
     for obs_id, obs_t in time_bins.to_dict().items():
-        wl_full_band, freq_full_band, t, Fnu_Jy[obs_id] = make_grb_spectrum(E0=Z['E0'], z=Z['z'], n0=Z['n0'], thetaObs=Z['thetaObs'], thetaCore=Z['thetaCore'], thetaWing=Z['thetaWing'], t=obs_t * grb.day2sec)
+        wl_full_band, freq_full_band, t, Fnu_Jy[obs_id] = make_grb_spectrum(jetType=Z['jetType'], specType=Z['specType'], E0=Z['E0'], z=Z['z'], n0=Z['n0'], thetaObs=Z['thetaObs'], thetaCore=Z['thetaCore'], thetaWing=Z['thetaWing'], t=obs_t * grb.day2sec)
     
     obs_list = list()
     for obs_id, fnu_val in Fnu_Jy.items():

@@ -7,8 +7,12 @@ import math
 import numpy as np
 from copy import deepcopy
 import afterglowpy as grb
+from astropy.cosmology import Planck18 as cosmo
 
+#sys.path.append('/pbs/home/m/mmasson/lsst/orphans/orphans')
 
+#from tools import flux_to_mag, get_wl_and_nu_band
+#from grb_configs import GRB_BASE_PARAMS
 from orphans.tools import flux_to_mag, get_wl_and_nu_band
 from orphans.grb_configs import GRB_BASE_PARAMS
 
@@ -43,14 +47,17 @@ def make_grb_light_curve(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
     return nu, t, Fnu_Jy
 
 
-def make_grb_spectrum(E0=1.0e53, z=1, n0=1., thetaObs=0.05, thetaCore=0.1, thetaWing=0.15, t=1.0 * grb.day2sec):
+def make_grb_spectrum(jetType=4, E0=1.0e53, z=1, n0=1., thetaObs=0.05, thetaCore=0.1, thetaWing=0.15, specType=0, t=1.0 * grb.day2sec):
     """ Compute GRB SED
     1.0 * grb.day2sec is just 1 day
     """
     # For convenience, place arguments into a dict.
     Z = deepcopy(GRB_BASE_PARAMS)
+    Z['jetType'] = jetType
+    Z['specType'] = specType
     Z['E0'] = E0
     Z['z'] = z
+    Z['d_L'] = cosmo.luminosity_distance(Z['z']).value * 3.08e24
     Z['n0'] = n0
     Z['thetaObs'] = thetaObs
     Z['thetaCore'] = thetaCore

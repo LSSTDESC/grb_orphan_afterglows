@@ -7,6 +7,7 @@ import afterglowpy as grb
 
 GRB_BASE_PARAMS = {
     'jetType': grb.jet.TopHat,  # Top-Hat jet
+    'b': 4,  # Power-law index
     'specType': 0,  # Basic Synchrotron Spectrum
     'thetaObs': 0.2,  # Viewing angle in radians
     'E0': 1.0e53,  # Isotropic-equivalent energy in erg
