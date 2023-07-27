@@ -30,5 +30,6 @@ setup(
                       "seaborn",
                       "dustmaps",
                       "emcee",
+                      "getdist",
                       "setuptools_scm"]
 )
