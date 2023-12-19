@@ -35,7 +35,7 @@ def flux_to_mag(flux):
 
 
 def mag_to_flux(mag):
-    """ Convert flux from AB Magnitude to Jansky
+    """ Convert flux from AB Magnitude to milli-Jansky
 
     1 Jy = 1e-23 erg/cm2/s/Hz
     Fnu = 3631 Jy = 3.631*1e-20 erg/cm2/s/Hz
