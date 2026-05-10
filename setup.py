@@ -29,5 +29,7 @@ setup(
                       "pyarrow",
                       "seaborn",
                       "dustmaps",
+                      "emcee",
+                      "getdist",
                       "setuptools_scm"]
 )

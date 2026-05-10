@@ -13,6 +13,8 @@ dependencies:
   - jupyterlab
   - seaborn
   - dustmaps
+  - emcee
+  - getdist
   - sphinx
   - sphinx_rtd_theme
   - pytest-cov
