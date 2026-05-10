@@ -8,6 +8,7 @@ pyarrow
 jupyterlab
 seaborn
 dustmaps
+jetsimpy
 sphinx
 sphinx_rtd_theme
 pytest-cov

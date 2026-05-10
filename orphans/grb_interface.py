@@ -1,18 +1,15 @@
-""" GRB Interface module
+''' GRB Interface module
 
 This module provides the main interface to afterglowpy
-"""
+'''
 
 import math
 import numpy as np
+import sys
 from copy import deepcopy
 import afterglowpy as grb
 from astropy.cosmology import Planck18 as cosmo
 
-#sys.path.append('/pbs/home/m/mmasson/lsst/orphans/orphans')
-
-#from tools import flux_to_mag, get_wl_and_nu_band
-#from grb_configs import GRB_BASE_PARAMS
 from orphans.tools import flux_to_mag, get_wl_and_nu_band
 from orphans.grb_configs import GRB_BASE_PARAMS
 
@@ -27,20 +24,20 @@ def make_grb_light_curve(E0=1.0e53, thetaObs=0.05, thetaCore=0.1, freq=5.0e14):
     :param freq: Light frequency
     :return: arrays of frequency, time and fluxes in Jy
     """
-    # For convenience, place arguments into a dict.
+    # for convenience, place arguments into a dict.
     Z = deepcopy(GRB_BASE_PARAMS)
     Z['E0'] = E0
     Z['thetaObs'] = thetaObs
     Z['thetaCore'] = thetaCore
 
-    # Space time points geometrically, from 10^3 s to 10^7 s
+    # space time points geometrically, from 10^3 s to 10^7 s
     t = np.geomspace(1.0e3, 1.0e7, 300)
 
-    # Calculate flux in a single band (all times have same frequency)
+    # calculate flux in a single band (all times have same frequency)
     nu = np.empty(t.shape)
     nu[:] = freq
 
-    # Calculate but Fnu is in mJy by default
+    # calculate but Fnu is in mJy by default
     fnu = grb.fluxDensity(t, nu, **Z)
     # so we convert to Jy
     Fnu_Jy = fnu * 1.0e-3
@@ -64,7 +61,7 @@ def make_grb_spectrum(jetType=4, E0=1.0e53, z=1, n0=1., thetaObs=0.05, thetaCore
     Z['thetaWing'] = thetaWing
     # first create a wavelength range from 200 to 1300 nm
     wl_full_band, freq_full_band = get_wl_and_nu_band()
-    # Calculate but Fnu is in mJy by default
+    # calculate but Fnu is in mJy by default
     fnu = grb.fluxDensity(t, freq_full_band, **Z)
     # so we convert to Jy
     Fnu_Jy = fnu * 1.0e-3
