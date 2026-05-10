@@ -1,43 +1,54 @@
-"""Pickle module
+"""Pickle module"""
 
-"""
+# This module automates the creation, simulation, storage,
+# and Rubin‑Observatory‑like pseudo‑observation of large ensembles of GRB
+# afterglow models, providing reusable binary artifacts for downstream
+# analysis such as detection‑efficiency studies or pipeline testing.
 
+import math
 
+# sys.path.append('/pbs/home/m/mmasson/lsst/rubin_sim')
+import os
 import pickle
-import numpy as np
-import afterglowpy as grb
-import math 
-import pandas as pd
 import sqlite3
-from astropy.cosmology import Planck18 as cosmo
-from tqdm import tqdm
-from astropy.time import Time, TimeDelta
-from astropy.coordinates import SkyCoord
-from scipy.stats import rv_continuous
-from scipy.integrate import simps
-from astropy import units as u
 import sys
 
-#sys.path.append('/pbs/home/m/mmasson/lsst/rubin_sim')
-
-import os
-#from photUtils.Bandpass import Bandpass
-#from photUtils.Sed import Sed
-#from data import get_baseline
-from rubin_sim.photUtils.Bandpass import Bandpass
-from rubin_sim.photUtils.Sed import Sed
+import afterglowpy as grb
+import numpy as np
+import pandas as pd
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+from astropy.cosmology import Planck18 as cosmo
+from astropy.time import Time, TimeDelta
 from rubin_sim.data import get_baseline
 
-#sys.path.append('/pbs/home/m/mmasson/lsst/orphans/orphans')
+# from photUtils.Bandpass import Bandpass
+# from photUtils.Sed import Sed
+# from data import get_baseline
+from rubin_sim.photUtils.Bandpass import Bandpass
+from rubin_sim.photUtils.Sed import Sed
+from scipy.integrate import simps
+from scipy.stats import rv_continuous
+from tqdm import tqdm
 
-from orphans.tools import ObsTime, time_coord, galactic_extinction
-from orphans.tools_rubin_sim import compute_mags, df_obs, real_obs, GRBObsTime
+# sys.path.append('/pbs/home/m/mmasson/lsst/orphans/orphans')
+from orphans.tools import ObsTime, galactic_extinction, time_coord
+from orphans.tools_rubin_sim import GRBObsTime, compute_mags, df_obs, real_obs
 
 
-
-def generate_configs(N, popType='realistic', grbType='short', specType=0, b=4, p=2.2, epsilon_e=0.1, epsilon_B=0.01, xi_N=1.0, filename=None):
-
-    """ Generate and save configurations
+def generate_configs(
+    N,
+    popType="realistic",
+    grbType="short",
+    specType=0,
+    b=4,
+    p=2.2,
+    epsilon_e=0.1,
+    epsilon_B=0.01,
+    xi_N=1.0,
+    filename=None,
+):
+    """Generate and save configurations
 
     :param N: number of configurations
     :param popType: type of the wanted GRB population ('realistic' for a realistic population or 'boosted' for an energy boosted population). Only for short GRBs. Default value is 'realistic'
@@ -49,22 +60,22 @@ def generate_configs(N, popType='realistic', grbType='short', specType=0, b=4, p
     :return: 1 Pickle file of configurations for each value of thetaCore (thetaCore = 0.05 and 0.15 so 2 Pickle files)
     """
 
-
-    Z = {'jetType': grb.jet.PowerLaw,  # Jet Type
-         'specType': specType,  # Emission Spectrum
-         'b': b,  # Power Law index
-         'thetaObs': 0.2,  # Viewing angle in radians
-         'E0': 1.0e51,  # Isotropic-equivalent energy in erg
-         'thetaWing': 0.15,  # Truncation angle in radians
-         'thetaCore': 0.05,  # Half-opening angle in radians
-         'n0': 0.1,  # Circumburst density in cm^{-3}
-         'p': p,  # Electron energy distribution index
-         'epsilon_e': epsilon_e,  # epsilon_e
-         'epsilon_B': epsilon_B,  # epsilon_B
-         'xi_N': xi_N,  # Fraction of electrons accelerated
-         'd_L': 1.0e28,  # Luminosity distance in cm
-         'z': 0.5}  # Redshift
-
+    Z = {
+        "jetType": grb.jet.PowerLaw,  # Jet Type
+        "specType": specType,  # Emission Spectrum
+        "b": b,  # Power Law index
+        "thetaObs": 0.2,  # Viewing angle in radians
+        "E0": 1.0e51,  # Isotropic-equivalent energy in erg
+        "thetaWing": 0.15,  # Truncation angle in radians
+        "thetaCore": 0.05,  # Half-opening angle in radians
+        "n0": 0.1,  # Circumburst density in cm^{-3}
+        "p": p,  # Electron energy distribution index
+        "epsilon_e": epsilon_e,  # epsilon_e
+        "epsilon_B": epsilon_B,  # epsilon_B
+        "xi_N": xi_N,  # Fraction of electrons accelerated
+        "d_L": 1.0e28,  # Luminosity distance in cm
+        "z": 0.5,
+    }  # Redshift
 
     # redshift distribution according to arXiv:1607.07875
     def z(x):
@@ -77,14 +88,11 @@ def generate_configs(N, popType='realistic', grbType='short', specType=0, b=4, p
         def _pdf(self, x, const):
             return (1.0 / const) * z(x)
 
-
-    if grbType == 'short':
-        
+    if grbType == "short":
         if filename == None:
-            file = open('../data/simulations/configs_' + str(N) + '.pkl', 'wb')
+            file = open("../data/simulations/configs_" + str(N) + ".pkl", "wb")
         else:
-            file = open(f'{filename}.pkl', 'wb')
-
+            file = open(f"{filename}.pkl", "wb")
 
         # redshift in the limits of GW detectors
         z_range = np.linspace(0.001, 0.1, 100)
@@ -95,39 +103,36 @@ def generate_configs(N, popType='realistic', grbType='short', specType=0, b=4, p
         all_dico = []
 
         for i in tqdm(range(N)):
+            # Z['thetaObs'] = np.random.uniform(0, np.pi/2)
+            Z["thetaObs"] = np.arccos(np.random.uniform(0, 1))
 
-            #Z['thetaObs'] = np.random.uniform(0, np.pi/2)
-            Z['thetaObs'] = np.arccos(np.random.uniform(0, 1))
-
-            if popType == 'realistic':
+            if popType == "realistic":
                 E = np.random.normal(51, 1)
-            elif popType == 'boosted':
+            elif popType == "boosted":
                 E = np.random.uniform(53, 55)
 
-            Z['E0'] = 1.0 * 10 ** E
-            Z['n0'] = 1.0 * 10 ** (-np.random.uniform(-1, 2))
-            Z['z'] = z_samples[i]
-            Z['d_L'] = cosmo.luminosity_distance(Z['z']).value * 3.08e24
+            Z["E0"] = 1.0 * 10**E
+            Z["n0"] = 1.0 * 10 ** (-np.random.uniform(-1, 2))
+            Z["z"] = z_samples[i]
+            Z["d_L"] = cosmo.luminosity_distance(Z["z"]).value * 3.08e24
 
-            Z['thetaCore'] = math.radians(np.random.lognormal(1.8, 0.5))
-            Z['thetaWing'] = math.radians(np.random.lognormal(1.8, 0.5))
+            Z["thetaCore"] = math.radians(np.random.lognormal(1.8, 0.5))
+            Z["thetaWing"] = math.radians(np.random.lognormal(1.8, 0.5))
 
-            while Z['thetaWing'] > np.pi / 2 or Z['thetaWing'] < Z['thetaCore']:
-                Z['thetaWing'] = math.radians(np.random.lognormal(1.8, 0.5))
+            while Z["thetaWing"] > np.pi / 2 or Z["thetaWing"] < Z["thetaCore"]:
+                Z["thetaWing"] = math.radians(np.random.lognormal(1.8, 0.5))
 
             all_dico.append(Z.copy())
-            
+
         pickle.dump(all_dico, file)
 
         file.close()
 
-
-    elif grbType == 'long':
-        
+    elif grbType == "long":
         if filename == None:
-            file = open('../data/simulations/configs_' + str(N) + '.pkl', 'wb')
+            file = open("../data/simulations/configs_" + str(N) + ".pkl", "wb")
         else:
-            file = open(f'{filename}.pkl', 'wb')
+            file = open(f"{filename}.pkl", "wb")
 
         # redshift ~ SFR
         z_range = np.linspace(0.001, 10, 100)
@@ -138,27 +143,26 @@ def generate_configs(N, popType='realistic', grbType='short', specType=0, b=4, p
         all_dico = []
 
         for i in tqdm(range(N)):
-
             # Z['thetaObs'] = np.random.uniform(0, np.pi/2)
-            Z['thetaObs'] = np.arccos(np.random.uniform(0, 1))
+            Z["thetaObs"] = np.arccos(np.random.uniform(0, 1))
 
             E = np.random.normal(53, 0.5)
 
-            Z['E0'] = 1.0 * 10 ** E
-            Z['n0'] = 1.0 * 10 ** (np.random.uniform(0., 2))
+            Z["E0"] = 1.0 * 10**E
+            Z["n0"] = 1.0 * 10 ** (np.random.uniform(0.0, 2))
 
-            Z['z'] = z_samples[i]
+            Z["z"] = z_samples[i]
             # Z['z'] = np.random.normal(1, 1)
-            #while Z['z'] < 0.:
-                #Z['z'] = np.random.normal(1, 1)
-            Z['d_L'] = cosmo.luminosity_distance(Z['z']).value * 3.08e24
+            # while Z['z'] < 0.:
+            # Z['z'] = np.random.normal(1, 1)
+            Z["d_L"] = cosmo.luminosity_distance(Z["z"]).value * 3.08e24
 
-            Z['thetaCore'] = math.radians(np.random.lognormal(1.8, 0.5))
-            Z['thetaWing'] = math.radians(np.random.lognormal(1.8, 0.5))
+            Z["thetaCore"] = math.radians(np.random.lognormal(1.8, 0.5))
+            Z["thetaWing"] = math.radians(np.random.lognormal(1.8, 0.5))
 
-            while Z['thetaWing'] > np.pi/2 or Z['thetaWing'] < Z['thetaCore']:
-                #Z['thetaCore'] = math.radians(np.random.lognormal(1.8, 0.5))
-                Z['thetaWing'] = math.radians(np.random.lognormal(1.8, 0.5))
+            while Z["thetaWing"] > np.pi / 2 or Z["thetaWing"] < Z["thetaCore"]:
+                # Z['thetaCore'] = math.radians(np.random.lognormal(1.8, 0.5))
+                Z["thetaWing"] = math.radians(np.random.lognormal(1.8, 0.5))
 
             all_dico.append(Z.copy())
 
@@ -167,9 +171,19 @@ def generate_configs(N, popType='realistic', grbType='short', specType=0, b=4, p
         file.close()
 
 
-def old_generate_configs(N, popType='realistic', type='short', specType=0, b=4, p=2.2, epsilon_e=0.1, epsilon_B=0.01,
-                     xi_N=1.0, filename=None):
-    """ [OLD VERSION] Generate and save configurations
+def old_generate_configs(
+    N,
+    popType="realistic",
+    type="short",
+    specType=0,
+    b=4,
+    p=2.2,
+    epsilon_e=0.1,
+    epsilon_B=0.01,
+    xi_N=1.0,
+    filename=None,
+):
+    """[OLD VERSION] Generate and save configurations
 
     :param N: number of configurations
     :param popType: type of the wanted GRB population ('realistic' for a realistic population or 'boosted' for an energy boosted population). Only for short GRBs. Default value is 'realistic'
@@ -181,28 +195,29 @@ def old_generate_configs(N, popType='realistic', type='short', specType=0, b=4, 
     :return: 1 Pickle file of configurations for each value of thetaCore (thetaCore = 0.05 and 0.15 so 2 Pickle files)
     """
 
-    Z = {'jetType': grb.jet.PowerLaw,  # Jet Type
-         'specType': specType,  # Emission Spectrum
-         'b': b,  # Power Law index
-         'thetaObs': 0.2,  # Viewing angle in radians
-         'E0': 1.0e51,  # Isotropic-equivalent energy in erg
-         'thetaWing': 0.15,  # Truncation angle in radians
-         'thetaCore': 0.05,  # Half-opening angle in radians
-         'n0': 0.1,  # Circumburst density in cm^{-3}
-         'p': p,  # Electron energy distribution index
-         'epsilon_e': epsilon_e,  # epsilon_e
-         'epsilon_B': epsilon_B,  # epsilon_B
-         'xi_N': xi_N,  # Fraction of electrons accelerated
-         'd_L': 1.0e28,  # Luminosity distance in cm
-         'z': 0.5}  # Redshift
-
+    Z = {
+        "jetType": grb.jet.PowerLaw,  # Jet Type
+        "specType": specType,  # Emission Spectrum
+        "b": b,  # Power Law index
+        "thetaObs": 0.2,  # Viewing angle in radians
+        "E0": 1.0e51,  # Isotropic-equivalent energy in erg
+        "thetaWing": 0.15,  # Truncation angle in radians
+        "thetaCore": 0.05,  # Half-opening angle in radians
+        "n0": 0.1,  # Circumburst density in cm^{-3}
+        "p": p,  # Electron energy distribution index
+        "epsilon_e": epsilon_e,  # epsilon_e
+        "epsilon_B": epsilon_B,  # epsilon_B
+        "xi_N": xi_N,  # Fraction of electrons accelerated
+        "d_L": 1.0e28,  # Luminosity distance in cm
+        "z": 0.5,
+    }  # Redshift
 
     if filename == None:
-        file1 = open('../data/simulations/configs_005_' + str(N) + '.pkl', 'wb')
-        file2 = open('../data/simulations/configs_015_' + str(N) + '.pkl', 'wb')
+        file1 = open("../data/simulations/configs_005_" + str(N) + ".pkl", "wb")
+        file2 = open("../data/simulations/configs_015_" + str(N) + ".pkl", "wb")
     else:
-        file1 = open(f'{filename}_005_{N}.pkl', 'wb')
-        file2 = open(f'{filename}_015_{N}.pkl', 'wb')
+        file1 = open(f"{filename}_005_{N}.pkl", "wb")
+        file2 = open(f"{filename}_015_{N}.pkl", "wb")
 
     z_range = np.linspace(0.001, 0.1, 100)
 
@@ -226,31 +241,30 @@ def old_generate_configs(N, popType='realistic', type='short', specType=0, b=4, 
     all_dico_015 = []
 
     for i in tqdm(range(N)):
-
         # Z['thetaObs'] = np.random.uniform(0, np.pi/2)
-        Z['thetaObs'] = np.arccos(np.random.uniform(0, 1))
+        Z["thetaObs"] = np.arccos(np.random.uniform(0, 1))
 
-        if popType == 'realistic':
+        if popType == "realistic":
             E = np.random.normal(51, 1)
-        elif popType == 'boosted':
+        elif popType == "boosted":
             E = np.random.uniform(53, 55)
 
-        Z['E0'] = 1.0 * 10 ** E
-        Z['n0'] = 1.0 * 10 ** (-np.random.uniform(-1, 2))
-        Z['z'] = z_samples[i]
-        Z['d_L'] = cosmo.luminosity_distance(Z['z']).value * 3.08e24
+        Z["E0"] = 1.0 * 10**E
+        Z["n0"] = 1.0 * 10 ** (-np.random.uniform(-1, 2))
+        Z["z"] = z_samples[i]
+        Z["d_L"] = cosmo.luminosity_distance(Z["z"]).value * 3.08e24
 
-        Z['thetaCore'] = 0.05
-        Z['thetaWing'] = math.radians(np.exp(np.random.normal(1.94, 0.5)))
+        Z["thetaCore"] = 0.05
+        Z["thetaWing"] = math.radians(np.exp(np.random.normal(1.94, 0.5)))
 
-        while Z['thetaWing'] < Z['thetaCore']:
-            Z['thetaWing'] = math.radians(np.exp(np.random.normal(1.94, 0.5)))
+        while Z["thetaWing"] < Z["thetaCore"]:
+            Z["thetaWing"] = math.radians(np.exp(np.random.normal(1.94, 0.5)))
         all_dico_005.append(Z.copy())
 
-        Z['thetaCore'] = 0.15
+        Z["thetaCore"] = 0.15
 
-        while Z['thetaWing'] < Z['thetaCore']:
-            Z['thetaWing'] = math.radians(np.exp(np.random.normal(1.94, 0.5)))
+        while Z["thetaWing"] < Z["thetaCore"]:
+            Z["thetaWing"] = math.radians(np.exp(np.random.normal(1.94, 0.5)))
         all_dico_015.append(Z.copy())
 
     pickle.dump(all_dico_005, file1)
@@ -260,10 +274,10 @@ def old_generate_configs(N, popType='realistic', type='short', specType=0, b=4, 
     file2.close()
 
 
-
-def calculate_results(N, t, freq=5.0e14, jetType='PL', filename_in=None, filename_out=None):
-
-    """ Calculate and save some results from the configurations
+def calculate_results(
+    N, t, freq=5.0e14, jetType="PL", filename_in=None, filename_out=None
+):
+    """Calculate and save some results from the configurations
 
     :param N: number of configurations
     :param t: time for which you want to calculate the light curve
@@ -275,78 +289,79 @@ def calculate_results(N, t, freq=5.0e14, jetType='PL', filename_in=None, filenam
     """
 
     if filename_out == None:
-        #file = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'wb')
-        file = open('../data/simulations/simulations_' + jetType + '_' + str(N) + '.pkl', 'wb')
+        # file = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'wb')
+        file = open(
+            "../data/simulations/simulations_" + jetType + "_" + str(N) + ".pkl", "wb"
+        )
     else:
-        file = open(f'{filename_out}.pkl', 'wb')
+        file = open(f"{filename_out}.pkl", "wb")
 
     if filename_in == None:
-        #file_open = open('../data/simulations/configs_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
-        file_open = open('../data/simulations/configs_' + str(N) + '.pkl', 'rb')
+        # file_open = open('../data/simulations/configs_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
+        file_open = open("../data/simulations/configs_" + str(N) + ".pkl", "rb")
     else:
-        file_open = open(f'{filename_in}.pkl', 'rb')
+        file_open = open(f"{filename_in}.pkl", "rb")
 
     configs_open = pickle.load(file_open)
 
-    Z_results = {'jetType': -1,  # Jet Type
-                 'config': {},  # Dictionary Z
-                 'time': [],  # Time
-                 'lc': [],  # Flux
-                 't_obs': 0,  # Observability duration in days
-                 'mag_min': 0,  # Minimum magnitude of the afterglow
-                 'axis': 'on',  # On-axis or Off-axis
-                 'observable': 'no',  # Observability of the afterglow : no or yes for >4. or >7. in days
-                 'F_gamma': '0'}  # Flux of photons above 30 MeV in ph/cm2/s
+    Z_results = {
+        "jetType": -1,  # Jet Type
+        "config": {},  # Dictionary Z
+        "time": [],  # Time
+        "lc": [],  # Flux
+        "t_obs": 0,  # Observability duration in days
+        "mag_min": 0,  # Minimum magnitude of the afterglow
+        "axis": "on",  # On-axis or Off-axis
+        "observable": "no",  # Observability of the afterglow : no or yes for >4. or >7. in days
+        "F_gamma": "0",
+    }  # Flux of photons above 30 MeV in ph/cm2/s
 
     all_Z_results = []
     dt = []
 
-
     for i in tqdm(range(len(configs_open))):
-
         nu = np.empty(t.shape)
         nu[:] = freq
 
         Z = configs_open[i]
 
-        if jetType == 'PL':
-            Z['jetType'] = grb.jet.PowerLaw
-            Z_results['jetType'] = 'PowerLaw'
-        elif jetType == 'G':
-            Z['jetType'] = grb.jet.Gaussian
-            Z_results['jetType'] = 'Gaussian'
-        elif jetType == 'TH':
-            Z['jetType'] = grb.jet.TopHat
-            Z_results['jetType'] = 'TopHat'
+        if jetType == "PL":
+            Z["jetType"] = grb.jet.PowerLaw
+            Z_results["jetType"] = "PowerLaw"
+        elif jetType == "G":
+            Z["jetType"] = grb.jet.Gaussian
+            Z_results["jetType"] = "Gaussian"
+        elif jetType == "TH":
+            Z["jetType"] = grb.jet.TopHat
+            Z_results["jetType"] = "TopHat"
 
         fnu = grb.fluxDensity(t, nu, **Z)
         mag = -2.5 * np.log10(fnu * 1.0e-26) - 48.6
         dt.append(ObsTime(t, mag))
 
-        Z_results['config'] = Z
-        Z_results['time'] = t * grb.sec2day
-        Z_results['lc'] = fnu
-        Z_results['t_obs'] = dt[i]
-        Z_results['mag_min'] = min(mag)
+        Z_results["config"] = Z
+        Z_results["time"] = t * grb.sec2day
+        Z_results["lc"] = fnu
+        Z_results["t_obs"] = dt[i]
+        Z_results["mag_min"] = min(mag)
 
-        #if Z['thetaWing'] < Z['thetaObs']:
-        if Z['thetaCore'] < Z['thetaObs']:
-            Z_results['axis'] = 'off'
+        # if Z['thetaWing'] < Z['thetaObs']:
+        if Z["thetaCore"] < Z["thetaObs"]:
+            Z_results["axis"] = "off"
         else:
-            Z_results['axis'] = 'on'
+            Z_results["axis"] = "on"
 
-        if dt[i] < 4.:
-            Z_results['observable'] = 'no'
-        elif dt[i] >= 4.:
-            Z_results['observable'] = '> 4 days'
-            if dt[i] >= 7.:
-                Z_results['observable'] = '> 7 days'
+        if dt[i] < 4.0:
+            Z_results["observable"] = "no"
+        elif dt[i] >= 4.0:
+            Z_results["observable"] = "> 4 days"
+            if dt[i] >= 7.0:
+                Z_results["observable"] = "> 7 days"
 
         imax = np.where(mag == min(mag))
         t_max = t[imax[0]]
 
         if len(t_max) == 1:
-
             # Range of LAT
             nua = 1.0e8 * 1.6e-19 / 6.62e-34  # 10^5 keV
             nub = 5.0e10 * 1.6e-19 / 6.62e-34  # 5 x 10^ keV
@@ -358,12 +373,12 @@ def calculate_results(N, t, freq=5.0e14, jetType='PL', filename_in=None, filenam
 
             Nnu = []  # Flux calculated with wavelength
             for i in range(len(nu_lat)):
-                Nnu.append(Fnu_max[i] * 10 ** -29 / (nu_lat[i] * 6.62e-34))
+                Nnu.append(Fnu_max[i] * 10**-29 / (nu_lat[i] * 6.62e-34))
 
-            Z_results['F_gamma'] = sum(Nnu) * delta_nu / 10 ** 4  # Flux in photon/cm2/s
+            Z_results["F_gamma"] = sum(Nnu) * delta_nu / 10**4  # Flux in photon/cm2/s
 
         else:
-            Z_results['F_gamma'] = 0
+            Z_results["F_gamma"] = 0
 
         all_Z_results.append(Z_results.copy())
 
@@ -373,10 +388,8 @@ def calculate_results(N, t, freq=5.0e14, jetType='PL', filename_in=None, filenam
     file.close()
 
 
-
-def open_results(N, jetType='PL', filename=None):
-
-    """ Shows results from the configurations
+def open_results(N, jetType="PL", filename=None):
+    """Shows results from the configurations
 
     :param N: number of configurations
     :param thetaC: value of thetaCore you want to study the afterglow ('005' for 0.05 radians or '015' for 0.15 radians)
@@ -386,10 +399,12 @@ def open_results(N, jetType='PL', filename=None):
     """
 
     if filename == None:
-        #file_open = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
-        file_open = open('../data/simulations/simulations_' + jetType + '_' + str(N) + '.pkl', 'rb')
+        # file_open = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
+        file_open = open(
+            "../data/simulations/simulations_" + jetType + "_" + str(N) + ".pkl", "rb"
+        )
     else:
-        file_open = open(f'{filename}.pkl', 'rb')
+        file_open = open(f"{filename}.pkl", "rb")
 
     configs_open = pickle.load(file_open)
     file_open.close()
@@ -397,9 +412,17 @@ def open_results(N, jetType='PL', filename=None):
     return pd.DataFrame(configs_open)
 
 
-def generate_pseudo_obs(N, path_data, path_dustmaps, axis='off', jetType='PL', filename_in=None, filename_out=None, extinction=True):
-
-    """ Generate and save pseudo-observations of the lights curves
+def generate_pseudo_obs(
+    N,
+    path_data,
+    path_dustmaps,
+    axis="off",
+    jetType="PL",
+    filename_in=None,
+    filename_out=None,
+    extinction=True,
+):
+    """Generate and save pseudo-observations of the lights curves
 
     :param N: number of configurations
     :param jetType: type of simulated jet ('PL' for Power-Law, 'G' for Gaussian and 'TH' for Top-Hat). Default value is 'PL'
@@ -415,56 +438,59 @@ def generate_pseudo_obs(N, path_data, path_dustmaps, axis='off', jetType='PL', f
     conn = sqlite3.connect(baseline_db)
 
     # In the near future, 'summaryallprops' will be replaced with 'observations'
-    df = pd.read_sql('select * from observations;', conn)
+    df = pd.read_sql("select * from observations;", conn)
 
     conn.close()
 
     # path_data = '/home/masson/rubin_sim_data'
-    fdir = os.path.join(path_data, 'throughputs', 'baseline')
+    fdir = os.path.join(path_data, "throughputs", "baseline")
 
     # Read the throughput curves
-    filterlist = ['u', 'g', 'r', 'i', 'z', 'y']
-    filtercolors = {'u': 'b', 'g': 'c', 'r': 'g', 'i': 'orange', 'z': 'r', 'y': 'm'}
+    filterlist = ["u", "g", "r", "i", "z", "y"]
+    filtercolors = {"u": "b", "g": "c", "r": "g", "i": "orange", "z": "r", "y": "m"}
 
     lsst = {}
     for f in filterlist:
         lsst[f] = Bandpass()
-        lsst[f].readThroughput(os.path.join(fdir, f'total_{f}.dat'))
+        lsst[f].readThroughput(os.path.join(fdir, f"total_{f}.dat"))
 
     if filename_in == None:
-        #file_open = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
-        file_open = open('../data/simulations/simulations_' + jetType + '_' + str(N) + '.pkl', 'rb')
+        # file_open = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
+        file_open = open(
+            "../data/simulations/simulations_" + jetType + "_" + str(N) + ".pkl", "rb"
+        )
     else:
-        file_open = open(f'{filename_in}.pkl', 'rb')
+        file_open = open(f"{filename_in}.pkl", "rb")
     configs_open = pickle.load(file_open)
     file_open.close()
 
     configs = pd.DataFrame(configs_open)
-    configs = configs[(configs['axis'] == axis) & (configs['t_obs'] > 7.)]
+    configs = configs[(configs["axis"] == axis) & (configs["t_obs"] > 7.0)]
     # configs = configs[configs['mag_min']<22]
 
     if filename_out == None:
-        #file = open('../data/pseudo_obs/pseudo_obs_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'wb')
-        file = open('../data/pseudo_obs/pseudo_obs_' + jetType + '_' + str(N) + '.pkl', 'wb')
+        # file = open('../data/pseudo_obs/pseudo_obs_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'wb')
+        file = open(
+            "../data/pseudo_obs/pseudo_obs_" + jetType + "_" + str(N) + ".pkl", "wb"
+        )
     else:
-        file = open(f'{filename_out}.pkl', 'wb')
-
+        file = open(f"{filename_out}.pkl", "wb")
 
     # dictionary containing all the GRB information
-    LC = {'config': {},  # Dictionary Z
-          'grb_time': 0,  # GRB observation date
-          'grb_coord': 0,  # GRB ra/dec coordinates
-          'time': [],  # Time of each detection
-          'mags': [],  # Magnitude of the detection
-          'filt': [],  # Filter used at the moment of the detection
-          'mags_lim': [],  # Limiting magnitude of the detection at the observation time
-          'mags_err': []}   # Error on the magnitude
+    LC = {
+        "config": {},  # Dictionary Z
+        "grb_time": 0,  # GRB observation date
+        "grb_coord": 0,  # GRB ra/dec coordinates
+        "time": [],  # Time of each detection
+        "mags": [],  # Magnitude of the detection
+        "filt": [],  # Filter used at the moment of the detection
+        "mags_lim": [],  # Limiting magnitude of the detection at the observation time
+        "mags_err": [],
+    }  # Error on the magnitude
 
     all_LC = []
 
-
-    for config in tqdm(configs['config']):
-
+    for config in tqdm(configs["config"]):
         Z = config
         # print(Z)
 
@@ -480,19 +506,25 @@ def generate_pseudo_obs(N, path_data, path_dustmaps, axis='off', jetType='PL', f
         # grb_coord = SkyCoord(grb_ra, grb_dec, frame='icrs')
 
         # Observe t_before days before and t_after days after
-        t_before = TimeDelta(20, format='jd')
-        t_after = TimeDelta(365, format='jd')
+        t_before = TimeDelta(20, format="jd")
+        t_after = TimeDelta(365, format="jd")
         obs_start = grb_time - t_before
         obs_end = grb_time + t_after
 
         # Get time span
-        df_time = df[(df['observationStartMJD'] > obs_start.mjd) & (df['observationStartMJD'] < obs_end.mjd)]
+        df_time = df[
+            (df["observationStartMJD"] > obs_start.mjd)
+            & (df["observationStartMJD"] < obs_end.mjd)
+        ]
 
         # Angular separation with SkyCoord.separation
         # Rubin FOV is 47 square degree for a 3.5-degree diameter, hence 1.7 deg separation radius.
-        df_time['Separation'] = SkyCoord(df_time['fieldRA'], df_time['fieldDec'], unit="deg").separation(
-            grb_coord).degree
-        df_sky = df_time[df_time['Separation'] < 1.7]
+        df_time["Separation"] = (
+            SkyCoord(df_time["fieldRA"], df_time["fieldDec"], unit="deg")
+            .separation(grb_coord)
+            .degree
+        )
+        df_sky = df_time[df_time["Separation"] < 1.7]
 
         # print(df_sky)
 
@@ -502,9 +534,11 @@ def generate_pseudo_obs(N, path_data, path_dustmaps, axis='off', jetType='PL', f
 
         obs_list = df_obs(Z, df_sky, time_bins, lsst)
 
-        y_mags = []    # magnitude with extinction
+        y_mags = []  # magnitude with extinction
 
-        a_lambda_u, a_lambda_g, a_lambda_r, a_lambda_i, a_lambda_z, a_lambda_y = galactic_extinction(grb_coord, path_dustmaps)
+        a_lambda_u, a_lambda_g, a_lambda_r, a_lambda_i, a_lambda_z, a_lambda_y = (
+            galactic_extinction(grb_coord, path_dustmaps)
+        )
 
         # If there is no observation, let's go to the next configuration
         if len(obs_list) == 0:
@@ -514,50 +548,48 @@ def generate_pseudo_obs(N, path_data, path_dustmaps, axis='off', jetType='PL', f
         else:
             obs_df = pd.concat(obs_list)
 
-            obs_df['observationId'] = df_sky['observationId']
+            obs_df["observationId"] = df_sky["observationId"]
 
-            x_times, y_mags_without_ext, z_colors, mags_lim, mags_err = real_obs(obs_df, df_sky, time_bins, grb_time, lsst)
+            x_times, y_mags_without_ext, z_colors, mags_lim, mags_err = real_obs(
+                obs_df, df_sky, time_bins, grb_time, lsst
+            )
 
             if extinction == True:
-
                 for i in range(len(y_mags_without_ext)):
-                    if z_colors[i] == 'b':
+                    if z_colors[i] == "b":
                         y_mags.append(y_mags_without_ext[i] + a_lambda_u)
-                    elif z_colors[i] == 'c':
+                    elif z_colors[i] == "c":
                         y_mags.append(y_mags_without_ext[i] + a_lambda_g)
-                    elif z_colors[i] == 'g':
+                    elif z_colors[i] == "g":
                         y_mags.append(y_mags_without_ext[i] + a_lambda_r)
-                    elif z_colors[i] == 'orange':
+                    elif z_colors[i] == "orange":
                         y_mags.append(y_mags_without_ext[i] + a_lambda_i)
-                    elif z_colors[i] == 'r':
+                    elif z_colors[i] == "r":
                         y_mags.append(y_mags_without_ext[i] + a_lambda_z)
                     else:
                         y_mags.append(y_mags_without_ext[i] + a_lambda_y)
 
-                LC['mags'] = y_mags
+                LC["mags"] = y_mags
 
             elif extinction == False:
+                LC["mags"] = y_mags_without_ext
 
-                LC['mags'] = y_mags_without_ext
-
-            LC['config'] = Z
-            LC['grb_time'] = grb_time.isot
-            LC['grb_coord'] = grb_coord.to_string('hmsdms')
-            LC['time'] = x_times
-            LC['filt'] = z_colors
-            LC['mags_lim'] = mags_lim
-            LC['mags_err'] = list(np.array(mags_err)[:, 0, 0])
+            LC["config"] = Z
+            LC["grb_time"] = grb_time.isot
+            LC["grb_coord"] = grb_coord.to_string("hmsdms")
+            LC["time"] = x_times
+            LC["filt"] = z_colors
+            LC["mags_lim"] = mags_lim
+            LC["mags_err"] = list(np.array(mags_err)[:, 0, 0])
 
             all_LC.append(LC.copy())
 
     pickle.dump(all_LC, file)
     file.close()
-    
-    
-    
-def generate_one_pseudo_obs(config, path_data, path_dustmaps, extinction=True):
 
-    """ Generate one pseudo-observation of the light curve for a given configuration
+
+def generate_one_pseudo_obs(config, path_data, path_dustmaps, extinction=True):
+    """Generate one pseudo-observation of the light curve for a given configuration
 
     :param config: configuration in a dictionary
     :param extinction: whether you want to take into account the galactic extinction or not. Takes the values 'True' or 'False', default is 'True'
@@ -572,32 +604,33 @@ def generate_one_pseudo_obs(config, path_data, path_dustmaps, extinction=True):
     conn = sqlite3.connect(baseline_db)
 
     # In the near future, 'summaryallprops' will be replaced with 'observations'
-    df = pd.read_sql('select * from observations;', conn)
+    df = pd.read_sql("select * from observations;", conn)
 
     conn.close()
 
     # path_data = '/home/masson/rubin_sim_data'
-    fdir = os.path.join(path_data, 'throughputs', 'baseline')
+    fdir = os.path.join(path_data, "throughputs", "baseline")
 
     # Read the throughput curves
-    filterlist = ['u', 'g', 'r', 'i', 'z', 'y']
-    filtercolors = {'u': 'b', 'g': 'c', 'r': 'g', 'i': 'orange', 'z': 'r', 'y': 'm'}
+    filterlist = ["u", "g", "r", "i", "z", "y"]
+    filtercolors = {"u": "b", "g": "c", "r": "g", "i": "orange", "z": "r", "y": "m"}
 
     lsst = {}
     for f in filterlist:
         lsst[f] = Bandpass()
-        lsst[f].readThroughput(os.path.join(fdir, f'total_{f}.dat'))
-        
-        
+        lsst[f].readThroughput(os.path.join(fdir, f"total_{f}.dat"))
+
     # dictionary containing all the GRB information
-    LC = {'config': config,  # Dictionary Z
-          'grb_time': 0,  # GRB observation date
-          'grb_coord': 0,  # GRB ra/dec coordinates
-          'time': [],  # Time of each detection
-          'mags': [],  # Magnitude of the detection
-          'filt': [],  # Filter used at the moment of the detection
-          'mags_lim': [],  # Limiting magnitude of the detection at the observation time
-          'mags_err': []}   # Error on the magnitude
+    LC = {
+        "config": config,  # Dictionary Z
+        "grb_time": 0,  # GRB observation date
+        "grb_coord": 0,  # GRB ra/dec coordinates
+        "time": [],  # Time of each detection
+        "mags": [],  # Magnitude of the detection
+        "filt": [],  # Filter used at the moment of the detection
+        "mags_lim": [],  # Limiting magnitude of the detection at the observation time
+        "mags_err": [],
+    }  # Error on the magnitude
 
     print(config)
 
@@ -605,74 +638,74 @@ def generate_one_pseudo_obs(config, path_data, path_dustmaps, extinction=True):
     grb_time, grb_coord = time_coord()
 
     # Observe t_before days before and t_after days after
-    t_before = TimeDelta(20, format='jd')
-    t_after = TimeDelta(365, format='jd')
+    t_before = TimeDelta(20, format="jd")
+    t_after = TimeDelta(365, format="jd")
     obs_start = grb_time - t_before
     obs_end = grb_time + t_after
 
     # Get time span
-    df_time = df[(df['observationStartMJD'] > obs_start.mjd) & (df['observationStartMJD'] < obs_end.mjd)]
+    df_time = df[
+        (df["observationStartMJD"] > obs_start.mjd)
+        & (df["observationStartMJD"] < obs_end.mjd)
+    ]
 
     # Angular separation with SkyCoord.separation
     # Rubin FOV is 47 square degree for a 3.5-degree diameter, hence 1.7 deg separation radius.
-    df_time['Separation'] = SkyCoord(df_time['fieldRA'], df_time['fieldDec'], unit="deg").separation(
-        grb_coord).degree
-    df_sky = df_time[df_time['Separation'] < 1.7]
-
-    
+    df_time["Separation"] = (
+        SkyCoord(df_time["fieldRA"], df_time["fieldDec"], unit="deg")
+        .separation(grb_coord)
+        .degree
+    )
+    df_sky = df_time[df_time["Separation"] < 1.7]
 
     time_bins = GRBObsTime(df_sky, grb_time)
 
     obs_list = df_obs(config, df_sky, time_bins, lsst)
 
-    y_mags = []    # magnitude with extinction
+    y_mags = []  # magnitude with extinction
 
-    a_lambda_u, a_lambda_g, a_lambda_r, a_lambda_i, a_lambda_z, a_lambda_y = galactic_extinction(grb_coord, path_dustmaps)
+    a_lambda_u, a_lambda_g, a_lambda_r, a_lambda_i, a_lambda_z, a_lambda_y = (
+        galactic_extinction(grb_coord, path_dustmaps)
+    )
 
-    
     # If there is no observation, let's go to the next configuration
     if len(obs_list) == 0:
-        return 'no observation'
+        return "no observation"
 
-    
     else:
         obs_df = pd.concat(obs_list)
 
-        obs_df['observationId'] = df_sky['observationId']
-            
-        x_times, y_mags_without_ext, z_colors, mags_lim, mags_err = real_obs(obs_df, df_sky, time_bins, grb_time, lsst)
+        obs_df["observationId"] = df_sky["observationId"]
+
+        x_times, y_mags_without_ext, z_colors, mags_lim, mags_err = real_obs(
+            obs_df, df_sky, time_bins, grb_time, lsst
+        )
 
         if extinction == True:
-
             for i in range(len(y_mags_without_ext)):
-                    
-                if z_colors[i] == 'b':
+                if z_colors[i] == "b":
                     y_mags.append(y_mags_without_ext[i] + a_lambda_u)
-                elif z_colors[i] == 'c':
+                elif z_colors[i] == "c":
                     y_mags.append(y_mags_without_ext[i] + a_lambda_g)
-                elif z_colors[i] == 'g':
+                elif z_colors[i] == "g":
                     y_mags.append(y_mags_without_ext[i] + a_lambda_r)
-                elif z_colors[i] == 'orange':
+                elif z_colors[i] == "orange":
                     y_mags.append(y_mags_without_ext[i] + a_lambda_i)
-                elif z_colors[i] == 'r':
+                elif z_colors[i] == "r":
                     y_mags.append(y_mags_without_ext[i] + a_lambda_z)
                 else:
                     y_mags.append(y_mags_without_ext[i] + a_lambda_y)
-            LC['mags'] = y_mags
+            LC["mags"] = y_mags
 
         elif extinction == False:
+            LC["mags"] = y_mags_without_ext
 
-            LC['mags'] = y_mags_without_ext
+        LC["config"] = config
+        LC["grb_time"] = grb_time.isot
+        LC["grb_coord"] = grb_coord.to_string("hmsdms")
+        LC["time"] = x_times
+        LC["filt"] = z_colors
+        LC["mags_lim"] = mags_lim
+        LC["mags_err"] = list(np.array(mags_err)[:, 0, 0])
 
-        LC['config'] = config
-        LC['grb_time'] = grb_time.isot
-        LC['grb_coord'] = grb_coord.to_string('hmsdms')
-        LC['time'] = x_times
-        LC['filt'] = z_colors
-        LC['mags_lim'] = mags_lim
-        LC['mags_err'] = list(np.array(mags_err)[:, 0, 0])
-        
         return LC
-
-
-

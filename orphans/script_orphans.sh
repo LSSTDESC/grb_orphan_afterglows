@@ -16,13 +16,13 @@
 # Commandes à soumettre :
 
 ccenv anaconda
-conda activate /pbs/home/m/mmasson/lsst/orphans_env
+conda activate orphans
 	
-export RUBIN_SIM_DATA=/pbs/home/m/mmasson/lsst/rubin_sim_data
-export RUBIN_SIM=/pbs/home/m/mmasson/lsst/rubin_sim
-export DUSTMAPS=/pbs/home/m/mmasson/lsst/orphans/data/schlafly_dust_factor.csv
-export SIMU=/pbs/home/m/mmasson/lsst/orphans/data/simulations
-export OBS=/pbs/home/m/mmasson/lsst/orphans/data/pseudo_obs
+export RUBIN_SIM_DATA=$(pwd)/data
+export RUBIN_SIM=$(pwd)/rubin_sim
+export DUSTMAPS=$(pwd)/data/schlafly_dust_factor.csv
+export SIMU = /pbs/home/m/mmasson/lsst/orphans/data/simulations
+export OBS = /pbs/home/m/mmasson/lsst/orphans/data/pseudo_obs
 	
 #module load python
 python generate_grb_pop.py

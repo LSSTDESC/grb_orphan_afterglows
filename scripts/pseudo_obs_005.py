@@ -18,7 +18,7 @@ import rubin_sim.photUtils.Bandpass as Bandpass
 import rubin_sim.photUtils.Sed as Sed
 
 import afterglowpy as grb
-from grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
+from orphans.grb_interface import make_grb_spectrum, dump_wl_Fnu_spectrum
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     conn.close()
 
-    fdir = '/home/masson/rubin_sim_data'
+    fdir = os.getenv('RUBIN_SIM_DATA', '/home/bregeon/Rubin/FINK/grb_orphan_afterglows/data')
     fdir = os.path.join(fdir, 'throughputs', 'baseline')
 
     # Read the throughput curves
