@@ -3,7 +3,7 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - python=3.11
+  - python=3.14
   - pip
   - matplotlib
   - numpy
@@ -20,4 +20,3 @@ dependencies:
   - sphinx_rtd_theme
   - pytest-cov
   - pylint
-  - markupsafe==2.0.1

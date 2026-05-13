@@ -17,4 +17,3 @@ sphinx
 sphinx_rtd_theme
 pytest-cov
 pylint
-markupsafe==2.0.1
