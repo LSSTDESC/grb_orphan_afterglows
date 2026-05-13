@@ -1,76 +1,63 @@
-import afterglowpy as grb
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-import pickle
-import math
-import sys
+# -*- coding: utf-8 -*-
+"""Generate GRB population simulations and pseudo‑observations.
+
+This script creates GRB configurations, computes light‑curves, and produces
+pseudo‑observations using the utilities in :mod:`orphans.pickling`.
+Environment variables required:
+- ``SIMU``: directory for simulation outputs
+- ``OBS``: directory for observation outputs
+- ``SLURM_JOB_ID``: identifier for the current job (used in file names)
+- ``RUBIN_SIM_DATA`` and ``DUSTMAPS``: paths needed for pseudo‑observation
+  generation.
+"""
+
 import os
-from itertools import chain
-import math
-from astropy.coordinates import SkyCoord
-from astropy.time import Time
-from astropy.cosmology import Planck18 as cosmo
-
 import warnings
-warnings.filterwarnings('ignore')
-
-#sys.path.append('/pbs/home/m/mmasson/lsst/orphans/orphans')
-
-#import pickling as pkg
+import numpy as np
 import orphans.pickling as pkg
-#from tools import ObsTime, mag_to_flux, flux_to_mag, pseudo_obs_with_points, galactic_extinction, get_wl_and_nu_band
-from orphans.tools import ObsTime, mag_to_flux, flux_to_mag, pseudo_obs_with_points, galactic_extinction, get_wl_and_nu_band
 
+warnings.filterwarnings("ignore")
 
-# Where to save the output files
-simu = os.environ['SIMU']
-obs = os.environ['OBS']
+# Required environment variables
+SIMU = os.environ["SIMU"]
+OBS = os.environ["OBS"]
+RUBIN_SIM_DATA = os.environ["RUBIN_SIM_DATA"]
+DUSTMAPS = os.environ["DUSTMAPS"]
 
-# Job ID
-job_id = os.get_env('SLURM_JOB_ID')
+# Job identifier (may be ``None`` if not set)
+JOB_ID = os.getenv("SLURM_JOB_ID")
 
-# Where are saved the rubin_sim data and dust factor table
-rubin_sim_data = os.environ['RUBIN_SIM_DATA']
-path_dustmaps = os.environ['DUSTMAPS']
+# Simulation parameters
+N = 1000  # number of simulated GRBs
+JET_TYPE = "PL"  # type of structured jet
 
+print(f"Generating {N} configurations...")
+CONFIG_NAME = f"{SIMU}/short_configs_{JOB_ID}"
+# Generate configurations
+pkg.generate_configs(N, popType="realistic", grbType="short", filename=CONFIG_NAME)
 
-# Parameters chosen for the GRB jet
-N = 1000           # number of simulated GRBs
-jetType = 'PL'     # type of structured jet
+print("Calculating results...")
+time_grid = np.geomspace(1.0e2, 1.0e9, 300)
+config_path = CONFIG_NAME
+SIM_NAME = f"{SIMU}/short_simulations_{JET_TYPE}_{JOB_ID}"
+# Compute light curves and results
+pkg.calculate_results(N, time_grid, filename_in=config_path, filename_out=SIM_NAME)
 
+# Load results into a DataFrame
+results = pkg.open_results(N, filename=SIM_NAME)
 
-# Generate all the configurations
-print(f'Generating {N} configurations...')
-name = f'{simu}/short_configs_{job_id}'
-#name = f'/home/masson/orphans/data/simulations/long_configs'
-pkg.generate_configs(N, popType='realistic', grbType='short', filename=name)
+# Select observable off‑axis afterglows (observed > 7 days)
+observable_oa = results[(results["axis"] == "off") & (results["t_obs"] > 7.0)]
 
+print(f"Generating pseudo‑observations for {len(observable_oa)} orphans")
+pseudo_obs_name = f"{OBS}/long_pseudo_obs_{JET_TYPE}_{JOB_ID}"
+# Generate pseudo‑observations
+pkg.generate_pseudo_obs(
+    N,
+    path_data=RUBIN_SIM_DATA,
+    path_dustmaps=DUSTMAPS,
+    filename_in=SIM_NAME,
+    filename_out=pseudo_obs_name,
+)
 
-# Compute the light curve and calculate some results from it (observability, minimal magnitude...)
-print('Calculating results...')
-t = np.geomspace(1.0e2, 1.0e9, 300)   # time for which the afterglow light curve is calculated
-
-#name_config = f'/home/masson/orphans/data/simulations/long_configs_{N}'
-name_config = f'{simu}/short_configs_{job_id}'
-#name_simu = f'/home/masson/orphans/data/simulations/long_simulations_{jetType}_{N}'
-name_simu = f'{simu}/short_simulations_{jetType}_{job_id}'
-
-pkg.calculate_results(N, t, filename_in=name_config, filename_out=name_simu)
-
-
-# Open the results in a Pandas Dataframe
-results = pkg.open_results(N, filename=name_simu)
-
-# Number of afterglows observed off-axis for at least 7 days
-observable_oa = results[(results['axis'] == 'off') & (results['t_obs'] > 7.)]
-
-
-# Generate pseudo-observations
-print(f'Generating pseudo-observations for {len(observable_oa)} orphans')
-#name_pseudo_obs = f'../data/pseudo_obs/long_pseudo_obs_{jetType}_{N}'
-name_pseudo_obs = f'{obs}/long_pseudo_obs_{jetType}_{job_id}'
-pkg.generate_pseudo_obs(N, path_data=rubin_sim_data, path_dustmaps=path_dustmaps,
-                        filename_in=name_simu, filename_out=name_pseudo_obs)
-print('Done!')
+print("Done!")
