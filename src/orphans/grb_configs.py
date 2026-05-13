@@ -2,11 +2,11 @@
 
     J. Bregeon - March 2022
 """
-import afterglowpy as grb
+import afterglowpy as grb  # pylint: disable=import-error,no-member,c-extension-no-member,E1101
 
 
 GRB_BASE_PARAMS = {
-    'jetType': grb.jet.TopHat,  # Top-Hat jet
+    'jetType': grb.jet.TopHat,  # Top-Hat jet  # pylint: disable=no-member,E1101,I1101,c-extension-no-member
     'b': 4,  # Power-law index
     'specType': 0,  # Basic Synchrotron Spectrum
     'thetaObs': 0.2,  # Viewing angle in radians
