@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=42", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orphans"
+authors = [{name = "Marina Masson", email = "marina.masson@lpsc.in2p3.fr"}, {name = "Johan Bregeon", email = "bregeon@in2p3.fr"}]
+description = "Studying Gamma-ray Bursts orphan afterglow optical light curves"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "GPL"}
+classifiers = [
+    "Development Status :: 1 - Beta",
+    "License :: OSI Approved :: GPL License",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+dependencies = [
+    "afterglowpy",
+    "matplotlib",
+    "numpy",
+    "astropy",
+    "scipy",
+    "pandas",
+    "pyarrow",
+    "seaborn",
+    "dustmaps",
+    "emcee",
+    "getdist",
+]
+version = "v1-rc1"
+
+[tool.setuptools_scm]
+write_to = "orphans/_version.py"
