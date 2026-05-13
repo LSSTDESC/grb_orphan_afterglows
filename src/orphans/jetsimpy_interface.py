@@ -4,13 +4,19 @@ Provides thin wrappers around the jetsimpy scientific core, mirroring the API of
 ``orphans.grb_interface`` but using the jetsimpy implementation.
 """
 
-import numpy as np
+# Standard library imports
 from copy import deepcopy
+
+# Third‑party imports – may be unavailable in the CI environment.
+import numpy as np
 import jetsimpy
 from astropy.cosmology import Planck18 as cosmo
 
+
 # Local imports – these modules already exist in the package.
+# pylint: disable=invalid-name,too-many-arguments,too-many-positional-arguments,unused-import
 from .tools import flux_to_mag, get_wl_and_nu_band
+# pylint: enable=invalid-name,too-many-arguments,too-many-positional-arguments,unused-import
 from .jetsimpy_configs import GRB_BASE_PARAMS
 
 
