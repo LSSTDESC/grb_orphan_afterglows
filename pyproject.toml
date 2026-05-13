@@ -30,7 +30,7 @@ dependencies = [
     "emcee",
     "getdist",
 ]
-dynamic = ["version"]
+version = "v1-rc1"
 
 [tool.setuptools_scm]
 write_to = "orphans/_version.py"
