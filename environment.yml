@@ -20,4 +20,3 @@ dependencies:
   - pytest-cov
   - pylint
   - markupsafe==2.0.1
-  - jetsimpy
