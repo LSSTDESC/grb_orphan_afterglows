@@ -2,9 +2,8 @@
 
 Study Gamma-ray Bursts orphan afterglows with Rubin LSST and FINK
 
-## Authors
-- Marina Masson <marina.masson@lpsc.in2p3.fr>
-- Johan Bregeon <bregeon@in2p3.fr>
+Read documentation on ReadTheDocs: [latest](https://grb_orphan_afterglows.readthedocs.io/en/latest/orphans.html)
+
 
 ## Installing from source
 This is the recommended installation procedure in a conda environment.
@@ -37,3 +36,12 @@ in which case, one shall follow instructions to download the scheduler data, and
 ```
 > export RUBIN_SIM_DATA_DIR=$MYWORKDIR/rubin_sim/rubin_sim_data"
 ```
+
+
+## People
+- Marina Masson <marina.masson@lpsc.in2p3.fr>
+- [Johan Bregeon](https://github.com/bregeon) (CNRS IN2P3 LPSC) <bregeon@in2p3.fr>
+
+## License, Contributing etc
+
+The code in this repository is available for re-use under the GPL v3 license.
