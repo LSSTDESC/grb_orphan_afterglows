@@ -5,17 +5,25 @@
 \usepackage{enumitem}
 \setlist{noitemsep}
 
-\title{Software Summary Document: \texttt{orphans}}
+\title{Software Summary Document: \\
+\texttt{grb\_orphan\_afterglows}}
 \author{Johan Bregeon}
 \date{2026-05-11}
 
 \begin{document}
 \maketitle
 
+\section*{Summary}
+Gamma‑ray bursts produce afterglows observable off‑axis, known as orphan afterglows.
+We simulated a population of short GRBs and their off‑axis light curves using afterglowpy and rubin\_sim.
+Machine‑learning classifiers applied to LSSTi-‑like lightcurve features achieve 86\% recovery of orphan afterglows while rejecting $>99.99$\% of contaminants.
+Our open source pipeline integrates with the Fink community broker, runnning on the real LSST alert streams.
+The code is publicly available and documented for reproducible orphan afterglow searches.
+
 \section*{Package Overview}
 \begin{itemize}
-  \item \textbf{Name}: \texttt{orphans}
-  \item \textbf{Purpose}: Simulate and analyse orphan gamma-ray burst (GRB) afterglows for the LSST/FINK surveys.
+  \item \textbf{Name}: \texttt{grb\_orphan\_afterglows}
+  \item \textbf{Purpose}: Simulate and analyse orphan gamma-ray burst (GRB) afterglows for the LSST survey, with an integration in the FINK broker.
   \item \textbf{Core references}: Uses \texttt{afterglowpy} for physics; integrates with \texttt{rubin\_sim} for sky coordinate handling.
 \end{itemize}
 
