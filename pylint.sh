@@ -1,8 +1,8 @@
 #!/bin/env bash
 # lint module
-pylint-3 ./orphans
+pylint ./orphans
 
 # lint scripts
-pylint-3 ./scripts
+pylint ./scripts
 
 
