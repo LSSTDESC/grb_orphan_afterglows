@@ -1,0 +1,144 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{enumitem}
+\setlist{noitemsep}
+
+\title{Software Summary Document: \\
+\texttt{grb\_orphan\_afterglows}}
+\author{Johan Bregeon}
+\date{2026-05-11}
+
+\begin{document}
+\maketitle
+
+\section*{Summary}
+Gamma‑ray bursts produce afterglows observable off‑axis, known as orphan afterglows.
+We simulated a population of short GRBs and their off‑axis light curves using afterglowpy and rubin\_sim.
+Machine‑learning classifiers applied to LSSTi-‑like lightcurve features achieve 86\% recovery of orphan afterglows while rejecting $>99.99$\% of contaminants.
+Our open source pipeline integrates with the Fink community broker, runnning on the real LSST alert streams.
+The code is publicly available and documented for reproducible orphan afterglow searches.
+
+\section*{Package Overview}
+\begin{itemize}
+  \item \textbf{Name}: \texttt{grb\_orphan\_afterglows}
+  \item \textbf{Purpose}: Simulate and analyse orphan gamma-ray burst (GRB) afterglows for the LSST survey, with an integration in the FINK broker.
+  \item \textbf{Core references}: Uses \texttt{afterglowpy} for physics; integrates with \texttt{rubin\_sim} for sky coordinate handling.
+\end{itemize}
+
+\section*{Installation \& Dependencies}
+\begin{itemize}
+  \item \textbf{Conda environment}: \texttt{environment.yml}
+  \item \textbf{Python version}: 3.10 (as defined in \texttt{environment.yml})
+  \item \textbf{Key dependencies}:
+    \begin{itemize}
+      \item \texttt{afterglowpy}
+      \item \texttt{rubin\_sim} (optional, for sky-coordinate utilities)
+      \item \texttt{pandas}, \texttt{numpy}, \texttt{scipy}, \texttt{seaborn}, \texttt{matplotlib}
+    \end{itemize}
+  \item \textbf{Installation steps} (from the repository root):
+\begin{verbatim}
+git clone https://github.com/LSSTDESC/grb_orphan_afterglows.git 
+cd orphans
+conda env create -f environment.yml
+conda activate orphans
+pip install -r requirements.txt
+conda install markupsafe==2.0.1
+pip install -e .
+# Optional: install rubin_sim if sky‑coord utilities are needed
+\end{verbatim}
+  \item \textbf{Environment variables} (required for the simulation script):
+    \begin{itemize}
+      \item \texttt{SIMU}=<path to simulation data>
+      \item \texttt{OBS}=<path to observation data>
+      \item \texttt{RUBIN\_SIM\_DATA}=<path to rubin\_sim data>
+      \item \texttt{DUSTMAPS}=<path to dust map files>
+    \end{itemize}
+\end{itemize}
+
+\section*{Core Functionality / API}
+\begin{longtable}{p{0.30\textwidth}p{0.60\textwidth}}
+\textbf{Module} & \textbf{Key symbols / description} \\ \hline
+\texttt{orphans.grb\_interface} &
+\begin{itemize}
+  \item \texttt{make\_grb\_light\_curve(params)} – compute multi-band light curves.
+  \item \texttt{make\_grb\_spectrum(params)} – produce wavelength–flux spectrum.
+  \item \texttt{dump\_wl\_Fnu\_spectrum(...)} – write spectrum to file.
+\end{itemize} \\
+\texttt{orphans.grb\_configs} & \texttt{GRB\_BASE\_PARAMS} – default dictionary of physical parameters. \\
+\texttt{orphans.tools} &
+\begin{itemize}
+  \item \texttt{flux\_to\_mag(flux, band)} – convert flux to magnitude.
+  \item \texttt{get\_wl\_and\_nu\_band(band)} – retrieve wavelength / frequency limits.
+\end{itemize} \\
+\texttt{orphans.tools\_rubin\_sim} & Utilities that wrap \texttt{rubin\_sim} for sky coordinate handling. \\
+\texttt{orphans.correlations} & Functions that compute statistical correlations between simulation parameters and observables, returning \texttt{pandas.DataFrame} and optional seaborn heatmaps. \\
+\texttt{orphans.pickling} & Helpers to serialize/deserialize simulation results (pickle, HDF5). \\
+\texttt{orphans.plotting\_lc} & Matplotlib helpers for visualising light curves. \\
+\texttt{scripts.generate\_grb\_pop.py} & Entry-point that orchestrates configuration generation, light-curve computation, and pseudo-observation creation. \\
+\end{longtable}
+
+\section*{Data Inputs \& Outputs}
+\begin{itemize}
+  \item \textbf{Inputs}
+    \begin{itemize}
+      \item Parameter dictionaries (or defaults) for GRB physics.
+      \item Optional sky-coordinate files from \texttt{rubin\_sim}.
+    \end{itemize}
+  \item \textbf{Outputs}
+    \begin{itemize}
+      \item Light-curve files: time vs. magnitude per band (CSV).
+      \item Spectral files: wavelength vs. $F_{\nu}$ (ASCII/CSV).
+      \item Pickled result objects for downstream analysis.
+    \end{itemize}
+\end{itemize}
+
+\section*{Testing \& Validation}
+\begin{itemize}
+  \item Test suite located in \texttt{tests/}.
+  \item Run with coverage:
+\begin{verbatim}
+python -m pytest --cov=./orphans --cov-report=html tests
+\end{verbatim}
+  \item Continuous integration (GitHub CI) builds the conda environment, runs the tests, and generates Sphinx documentation.
+  \item Validation against \texttt{afterglowpy} reference light curves is performed in \texttt{tests/test\_grb\_interface.py}.
+\end{itemize}
+
+\section*{Performance \& Scalability}
+\begin{itemize}
+  \item Typical single-GRB light-curve generation: $<$1 s on a modern laptop.
+  \item Batch generation (e.g., $10^{4}$ GRBs) is parallelised in \texttt{scripts/generate\_grb\_pop.py} using Python’s \texttt{multiprocessing} pool.
+  \item Memory footprint scales linearly with the number of simulated GRBs; a batch of $10^{4}$ light curves occupies $\sim$200 MB of RAM.
+\end{itemize}
+
+\section*{Documentation \& Support}
+\begin{itemize}
+  \item API docs: generated by Sphinx, hosted under \texttt{docs/} (run \texttt{make html} in that directory).
+  \item Example notebooks in \texttt{notebooks/} (e.g., \texttt{orphan\_analysis.ipynb}).
+  \item Issue tracker: GitHub project \url{https://github.com/LSSTDESC/grb\_orphan\_afterglows}.
+  \item Contact: \href{mailto:johan.bregeon@in2p3.fr}{johan.bregeon@in2p3.fr}.
+\end{itemize}
+
+\section*{Licensing \& Citation}
+\begin{itemize}
+	\item License: \texttt{GPL v3} (see \texttt{LICENSE} file).
+  \item Cite this software as:
+\begin{verbatim}
+Masson, M. and Bregeon, J. (2026). grb\_orphan\_aftreglows: Looking for GRB orphan afterglows in the Vera C. Rubin LSST.
+
+   https://github.com/LSSTDESC/grb\_orphan\_afterglows 
+\end{verbatim}
+\end{itemize}
+
+\section*{Change Log / Versioning}
+\begin{itemize}
+  \item Versioning is handled by \texttt{setuptools\_scm}; tags in the Git repository correspond to package versions.
+  \item Notable releases:
+    \begin{itemize}
+      \item \textbf{v0.2.0} – added \texttt{jetsimpy\_interface} for jet modelling.
+      \item \textbf{v0.1.0} – initial release with GRB light-curve core.
+    \end{itemize}
+\end{itemize}
+
+\end{document}
