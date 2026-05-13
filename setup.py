@@ -4,7 +4,7 @@ setup(
     name="orphans",
     author="Marina Masson",
     author_email="marina.masson@lpsc.in2p3.fr",
-    url = "https://gitlab.in2p3.fr/johan-bregeon/orphans",
+    url = "https://github.com/LSSTDESC/grb_orphan_afterglows",
     packages=["orphans"],
     description="Studying Gamma-ray Bursts orphan afterglow optical light curves",
     setup_requires=['setuptools_scm'],
