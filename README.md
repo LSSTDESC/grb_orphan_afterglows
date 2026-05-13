@@ -2,7 +2,7 @@
 
 Study Gamma-ray Bursts orphan afterglows with Rubin LSST and FINK
 
-Read documentation on ReadTheDocs: [latest](https://grb_orphan_afterglows.readthedocs.io/en/latest/orphans.html)
+Read documentation on ReadTheDocs: [latest](https://grb-orphan-afterglows.readthedocs.io/en/latest/)
 
 
 ## Installing from source
