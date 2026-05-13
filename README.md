@@ -2,15 +2,18 @@
 
 Study Gamma-ray Bursts orphan afterglows with Rubin LSST and FINK
 
+## Authors
+- Marina Masson <marina.masson@lpsc.in2p3.fr>
+- Johan Bregeon <bregeon@in2p3.fr>
 
 ## Installing from source
 This is the recommended installation procedure in a conda environment.
 It shall take care of the `afterglowpy` dependency cleanly.
 
 ```
-> git clone git@gitlab.in2p3.fr:johan-bregeon/orphans.git
+> git clone git@github.com:LSSTDESC/grb_orphan_afterglows.git
 or
-> https://gitlab.in2p3.fr/johan-bregeon/orphans.git
+> https://github.com/LSSTDESC/grb_orphan_afterglows.git
 then
 > cd orphans
 > conda env create -f environment.yml
