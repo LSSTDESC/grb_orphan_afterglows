@@ -1,6 +1,6 @@
 #!/bin/env bash
 # lint module
-pylint ./orphans
+pylint ./src/orphans
 
 # lint scripts
 pylint ./scripts
