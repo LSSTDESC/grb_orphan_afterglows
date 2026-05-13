@@ -1,5 +1,6 @@
 pip
 afterglowpy
+skysurvey
 matplotlib
 numpy
 astropy
