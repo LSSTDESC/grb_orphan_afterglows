@@ -37,6 +37,8 @@ in which case, one shall follow instructions to download the scheduler data, and
 > export RUBIN_SIM_DATA_DIR=$MYWORKDIR/rubin_sim/rubin_sim_data"
 ```
 
+and you may also install ``jetsimpy'', following instructions at:
+- https://github.com/haowang-astro/jetsimpy
 
 ## People
 - Marina Masson <marina.masson@lpsc.in2p3.fr>

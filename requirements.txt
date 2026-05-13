@@ -10,7 +10,6 @@ jupyterlab
 seaborn
 scikit-learn
 dustmaps
-jetsimpy
 emcee
 getdist
 sphinx
