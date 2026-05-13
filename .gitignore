@@ -101,4 +101,6 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# SCons
+.sconsign.dblite
 
