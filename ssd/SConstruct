@@ -1,0 +1,7 @@
+import os
+env = Environment(ENV=os.environ)
+
+LATEXPROJECT='ssd'
+pdfOutput = env.PDF(target=LATEXPROJECT+'.pdf',source=LATEXPROJECT+'.tex')
+Depends(pdfOutput,Split(LATEXPROJECT+'.tex'))
+#Depends(pdfOutput,Split(LATEXPROJECT+'.tex bibliography.bib'))
