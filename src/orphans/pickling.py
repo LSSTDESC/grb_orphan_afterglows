@@ -1,5 +1,5 @@
-"""Pickle module"""
-
+"""Pickle module
+"""
 # This module automates the creation, simulation, storage,
 # and Rubin‑Observatory‑like pseudo‑observation of large ensembles of GRB
 # afterglow models, providing reusable binary artifacts for downstream
@@ -11,22 +11,25 @@ import math
 import os
 import pickle
 import sqlite3
-import sys
 
-import afterglowpy as grb
+import afterglowpy as grb  # noqa: F401
 import numpy as np
 import pandas as pd
-from astropy import units as u
 from astropy.coordinates import SkyCoord
-from astropy.cosmology import Planck18 as cosmo
-from astropy.time import Time, TimeDelta
-from rubin_sim.data import get_baseline
+try:
+    from astropy.cosmology import Planck18 as cosmo
+except ImportError:  # pragma: no cover
+    cosmo = None  # type: ignore
+from astropy.time import TimeDelta
+from rubin_sim.data import get_baseline  # pylint: disable=import-error
 
 # from photUtils.Bandpass import Bandpass
 # from photUtils.Sed import Sed
 # from data import get_baseline
-from rubin_sim.photUtils.Bandpass import Bandpass
-from rubin_sim.photUtils.Sed import Sed
+try:
+    from rubin_sim.photUtils.Bandpass import Bandpass
+except ImportError:  # pragma: no cover
+    Bandpass = None  # type: ignore
 from scipy.integrate import simps
 from scipy.stats import rv_continuous
 from tqdm import tqdm
@@ -37,27 +40,34 @@ from orphans.tools_rubin_sim import GRBObsTime, compute_mags, df_obs, real_obs
 
 
 def generate_configs(
-    N,
-    popType="realistic",
-    grbType="short",
-    specType=0,
-    b=4,
-    p=2.2,
-    epsilon_e=0.1,
-    epsilon_B=0.01,
-    xi_N=1.0,
-    filename=None,
-):
-    """Generate and save configurations
+    n: int,
+    pop_type: str = "realistic",
+    grb_type: str = "short",
+    spec_type: int = 0,
+    b: int = 4,
+    p: float = 2.2,
+    epsilon_e: float = 0.1,
+    epsilon_b: float = 0.01,
+    xi_n: float = 1.0,
+    filename: str | None = None,
+) -> None:
+    # Backward‑compatible aliases for the original variable names used in the body
+    N = n
+    popType = pop_type
+    grbType = grb_type
+    specType = spec_type
+    epsilon_B = epsilon_b
+    xi_N = xi_n
+    """Generate and save configurations.
 
-    :param N: number of configurations
-    :param popType: type of the wanted GRB population ('realistic' for a realistic population or 'boosted' for an energy boosted population). Only for short GRBs. Default value is 'realistic'
-    :param type: type of GRB ('short' or 'long). Default is 'short'
-    :param specType: type of emission spectrum (0 for global cooling time + no inverse compton and 1 for global cooling time + inverse compton)
-    :param filename: name of the Pickle file containing all the configurations ('configs_thetaC_N.pkl' by default)
-    :other parameters: default values of the parameters of the model
-
-    :return: 1 Pickle file of configurations for each value of thetaCore (thetaCore = 0.05 and 0.15 so 2 Pickle files)
+    Parameters:
+        n (int): Number of configurations.
+        pop_type (str): "realistic" or "boosted" population type (short GRBs).
+        grb_type (str): "short" or "long".
+        spec_type (int): Emission spectrum type (0 or 1).
+        filename (str|None): Output pickle filename.
+    Returns:
+        None (writes to file).
     """
 
     Z = {
@@ -88,8 +98,8 @@ def generate_configs(
         def _pdf(self, x, const):
             return (1.0 / const) * z(x)
 
-    if grbType == "short":
-        if filename == None:
+    if grb_type == "short":
+        if filename is None:
             file = open("../data/simulations/configs_" + str(N) + ".pkl", "wb")
         else:
             file = open(f"{filename}.pkl", "wb")
@@ -106,9 +116,9 @@ def generate_configs(
             # Z['thetaObs'] = np.random.uniform(0, np.pi/2)
             Z["thetaObs"] = np.arccos(np.random.uniform(0, 1))
 
-            if popType == "realistic":
+            if pop_type == "realistic":
                 E = np.random.normal(51, 1)
-            elif popType == "boosted":
+            elif pop_type == "boosted":
                 E = np.random.uniform(53, 55)
 
             Z["E0"] = 1.0 * 10**E
@@ -129,7 +139,7 @@ def generate_configs(
         file.close()
 
     elif grbType == "long":
-        if filename == None:
+        if filename is None:
             file = open("../data/simulations/configs_" + str(N) + ".pkl", "wb")
         else:
             file = open(f"{filename}.pkl", "wb")
@@ -173,7 +183,7 @@ def generate_configs(
 
 def old_generate_configs(
     N,
-    popType="realistic",
+    pop_type="realistic",
     type="short",
     specType=0,
     b=4,
@@ -183,16 +193,16 @@ def old_generate_configs(
     xi_N=1.0,
     filename=None,
 ):
-    """[OLD VERSION] Generate and save configurations
+    """[OLD VERSION] Generate and save configurations.
 
-    :param N: number of configurations
-    :param popType: type of the wanted GRB population ('realistic' for a realistic population or 'boosted' for an energy boosted population). Only for short GRBs. Default value is 'realistic'
-    :param type: type of GRB ('short' or 'long). Default is 'short'
-    :param specType: type of emission spectrum (0 for global cooling time + no inverse compton and 1 for global cooling time + inverse compton)
-    :param filename: name of the Pickle file containing all the configurations ('configs_thetaC_N.pkl' by default)
-    :other parameters: default values of the parameters of the model
-
-    :return: 1 Pickle file of configurations for each value of thetaCore (thetaCore = 0.05 and 0.15 so 2 Pickle files)
+    Parameters:
+        N (int): Number of configurations.
+        pop_type (str): 'realistic' or 'boosted' population.
+        grb_type (str): 'short' or 'long'.
+        specType (int): Emission spectrum type.
+        filename (str|None): Output file name.
+    Returns:
+        None (writes to files).
     """
 
     Z = {
@@ -212,7 +222,7 @@ def old_generate_configs(
         "z": 0.5,
     }  # Redshift
 
-    if filename == None:
+    if filename is None:
         file1 = open("../data/simulations/configs_005_" + str(N) + ".pkl", "wb")
         file2 = open("../data/simulations/configs_015_" + str(N) + ".pkl", "wb")
     else:
@@ -244,9 +254,9 @@ def old_generate_configs(
         # Z['thetaObs'] = np.random.uniform(0, np.pi/2)
         Z["thetaObs"] = np.arccos(np.random.uniform(0, 1))
 
-        if popType == "realistic":
+        if pop_type == "realistic":
             E = np.random.normal(51, 1)
-        elif popType == "boosted":
+        elif pop_type == "boosted":
             E = np.random.uniform(53, 55)
 
         Z["E0"] = 1.0 * 10**E
@@ -281,8 +291,10 @@ def calculate_results(
 
     :param N: number of configurations
     :param t: time for which you want to calculate the light curve
-    :param thetaC: value of thetaCore you want to study the afterglow ('005' for 0.05 radians or '015' for 0.15 radians)
-    :param nu: value of the frequency of the observer in Hertz. Default is 5.0e14 Hz corresponding to the r filter
+    :param thetaC: value of thetaCore you want to study the afterglow ('005' for 0.05 radians or
+    '015' for 0.15 radians)
+    :param nu: value of the frequency of the observer in Hertz.
+    Default is 5.0e14 Hz corresponding to the r filter
     :param jetType: type of simulated jet ('PL' for Power-Law, 'G' for Gaussian and 'TH' for Top-Hat). Default value is 'PL'
 
     :return: 1 Pickle file of results from the configurations for the chosen value of thetaCore
@@ -392,13 +404,14 @@ def open_results(N, jetType="PL", filename=None):
     """Shows results from the configurations
 
     :param N: number of configurations
-    :param thetaC: value of thetaCore you want to study the afterglow ('005' for 0.05 radians or '015' for 0.15 radians)
+    :param thetaC: value of thetaCore you want to study the afterglow ('005' for 0.05 radians or
+    '015' for 0.15 radians)
     :param jetType: type of simulated jet ('PL' for Power-Law, 'G' for Gaussian and 'TH' for Top-Hat). Default value is 'PL'
 
     :return: a Panda Dataframe containing the results from the configurations for the chosen value of thetaCore
     """
 
-    if filename == None:
+    if filename is None:
         # file_open = open('../data/simulations/simulations_' + jetType + '_' + str(thetaC) + '_' + str(N) + '.pkl', 'rb')
         file_open = open(
             "../data/simulations/simulations_" + jetType + "_" + str(N) + ".pkl", "rb"
