@@ -5,6 +5,7 @@ matplotlib
 numpy
 astropy
 scipy
+cosmolopy
 pandas
 pyarrow
 jupyterlab
