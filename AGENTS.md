@@ -12,10 +12,10 @@ pip install -e .
 ## Environment Variables
 The main simulation script requires these environment variables:
 ```bash
-export SIMU=/path/to/simulation/data
-export OBS=/path/to/observation/data
-export RUBIN_SIM_DATA=/path/to/rubin_sim/data
-export DUSTMAPS=/path/to/dustmaps/data
+export SIMU=/home/bregeon/Work/orphans/grb_orphan_afterglows/simulation/data
+export OBS=/home/bregeon/Work/orphans/grb_orphan_afterglows/observation/data
+export RUBIN_SIM_DATA=/home/bregeon/Work/orphans/rubin_sim/rubin_sim_data
+export DUSTMAPS=/home/bregeon/Work/orphans/dustmaps
 ```
 **Will an agent miss this without help?** Yes – environment variables are not obvious from the code.
 
@@ -24,6 +24,15 @@ export DUSTMAPS=/path/to/dustmaps/data
 python -m pytest tests/
 ```
 **Will an agent miss this without help?** No – standard pytest usage.
+
+## Unit Test Results
+The following tests are currently failing:
+- test_duration_between_first_and_peak
+- test_heatmap_structure
+- test_minimal_magnitude
+- test_peak_time
+
+These failures are in the correlations module and need to be investigated and fixed.
 
 ## Linting
 ```bash
