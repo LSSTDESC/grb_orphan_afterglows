@@ -26,13 +26,9 @@ python -m pytest tests/
 **Will an agent miss this without help?** No – standard pytest usage.
 
 ## Unit Test Results
-The following tests are currently failing:
-- test_duration_between_first_and_peak
-- test_heatmap_structure
-- test_minimal_magnitude
-- test_peak_time
+All tests are now passing.
 
-These failures are in the correlations module and need to be investigated and fixed.
+The test_correlations.py file previously contained failing tests, but these have been fixed and the tests now pass correctly.
 
 ## Linting
 ```bash
