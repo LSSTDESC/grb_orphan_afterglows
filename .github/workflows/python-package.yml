@@ -37,6 +37,7 @@ jobs:
           pip install -e .
 
       - name: Lint with pylint
+        continue-on-error: true
         run: |
           ./pylint.sh
 

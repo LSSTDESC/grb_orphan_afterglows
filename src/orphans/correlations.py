@@ -74,7 +74,7 @@ def peak_time(lc_open, data="simu"):
         if lc == 0:
             time_max.append(np.nan)
         else:
-            if isinstance(lc["mags_lim"], float):
+            if isinstance(lc["mags_lim"], (float, np.floating)):
                 mag = [
                     lc["mags"][j]
                     for j in range(len(lc["mags"]))
@@ -91,7 +91,9 @@ def peak_time(lc_open, data="simu"):
             else:
                 time = lc["time"]
                 if data == "simu":
-                    time_max.append(time[lc["mags"].index(min(lc["mags"]))])
+                    min_mag = min(lc["mags"])
+                    min_idx = np.where(lc["mags"] == min_mag)[0][0]
+                    time_max.append(time[min_idx])
                 elif data == "elasticc":
                     if math.isnan(lc["mags"][0]):
                         time_max.append(np.nan)
@@ -124,7 +126,8 @@ def duration_between_first_and_peak(lc_open):
     t0 = []
     for lc in lc_open:
         if lc == 0:
-            dt = [x.append(np.nan) or x for x in dt]
+            for j in range(6):
+                dt[j].append(np.nan)
         else:
             mag_list = []
             time_list = []
@@ -149,7 +152,9 @@ def duration_between_first_and_peak(lc_open):
                 time = time_list[j]
                 if mag:
                     all_t0.append(time[0])
-                    dt[j].append(time[mag.index(min(mag))] - time[0])
+                    min_mag = min(mag)
+                    min_idx = np.where(np.array(mag) == min_mag)[0][0]
+                    dt[j].append(time[min_idx] - time[0])
                 else:
                     dt[j].append(np.nan)
                     all_t0.append(np.nan)
