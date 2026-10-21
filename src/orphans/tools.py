@@ -110,7 +110,28 @@ def ObsTime(t, mag):
         
         
         
-def time_coord():
+def obs_duration_th(t, mag):
+    """Observability duration (days) for a light curve where mag < 24.5.
+
+    Parameters
+    ----------
+    t : array‑like
+        Times (seconds) of the light‑curve points.
+    mag : array‑like
+        Corresponding AB magnitudes.
+
+    Returns
+    -------
+    float
+        Duration in days (0 if never brighter than 24.5).
+    """
+    idx = np.where(np.asarray(mag) < 24.5)[0]
+    if idx.size == 0:
+        return 0.0
+    return (t[idx.max()] - t[idx.min()]) * grb.sec2day
+
+
+def time_coord()
     """ Take randomly the time and ra/dec of a GRB during LSST
 
     Returns
