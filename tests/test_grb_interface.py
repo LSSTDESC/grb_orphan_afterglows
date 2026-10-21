@@ -1,5 +1,5 @@
 import numpy as np
-from src.orphans.grb_interface import make_grb_light_curve, make_grb_spectrum, dump_wl_Fnu_spectrum
+from orphans.grb_interface import make_grb_light_curve, make_grb_spectrum, dump_wl_Fnu_spectrum
 
 def test_make_grb_light_curve():
     """Test suite for make_grb_light_curve."""
