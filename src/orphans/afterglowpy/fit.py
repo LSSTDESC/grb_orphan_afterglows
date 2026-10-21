@@ -11,7 +11,7 @@ from iminuit.cost import LeastSquares
 
 sys.path.append('/home/masson/afterglowpy/orphan_modules')
 
-from tools import flux_to_mag, mag_to_flux
+from orphans.tools import flux_to_mag, mag_to_flux
 
 
 def rescale_filters(times, mags, mags_err, filts):
