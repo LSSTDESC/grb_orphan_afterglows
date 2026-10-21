@@ -11,7 +11,7 @@ import afterglowpy as grb
 from astropy.cosmology import Planck18 as cosmo
 
 sys.path.append('/home/masson/afterglowpy/orphan_modules')
-from tools import flux_to_mag, get_wl_and_nu_band
+from orphans.tools import flux_to_mag, get_wl_and_nu_band
 from grb_configs import GRB_BASE_PARAMS
 
 

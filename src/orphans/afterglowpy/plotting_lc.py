@@ -10,7 +10,7 @@ import sys
 
 sys.path.append('/home/masson/afterglowpy/orphan_modules')
 
-from tools import mag_to_flux, galactic_extinction
+from orphans.tools import mag_to_flux, galactic_extinction
 
 
 

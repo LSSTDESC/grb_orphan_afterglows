@@ -11,7 +11,7 @@ from astropy.cosmology import Planck18 as cosmo
 
 #sys.path.append('/pbs/home/m/mmasson/lsst/orphans/orphans')
 
-from modules.tools import flux_to_mag, get_wl_and_nu_band
+from orphans.tools import flux_to_mag, get_wl_and_nu_band
 from modules.grb_configs import GRB_BASE_PARAMS
 
 

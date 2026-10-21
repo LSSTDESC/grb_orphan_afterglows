@@ -7,7 +7,7 @@ from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 from astropy.time import Time
 
-from modules.tools import flux_to_mag
+from orphans.tools import flux_to_mag
 
 
 def plot_pseudo_obs(lc, lc_th=True):
