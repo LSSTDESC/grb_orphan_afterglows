@@ -1,5 +1,10 @@
 # GRB Orphan Afterglows Project - Context Summary
 
+## Agents instructions: Conciseness & Precision Guidelines
+- Keep explanations brief; focus on core points.                                                                 
+- Use specific, concrete terms—avoid vague language.
+- Prioritize direct answers over elaboration unless the user explicitly requests examples or deeper detail.      
+
 ## Project Purpose
 Scientific project studying Gamma-ray Burst (GRB) orphan afterglows using Rubin LSST and FINK data to model and analyze optical light curves.
 
