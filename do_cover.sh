@@ -1,1 +1,1 @@
-python -m pytest --cov=./orphans --cov-report=html tests
+python -m pytest --cov=orphans --cov-report=html tests
