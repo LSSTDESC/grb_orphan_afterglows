@@ -62,7 +62,12 @@ A uv-managed Python 3.11 environment is used for reproducibility (`uv.lock`, 199
 - Dev tooling: `uv pip install --group dev` (pytest, pytest-cov, pylint, sphinx, jupyterlab).
 - Run tests: `uv run --python .venv/bin/python python -m pytest --cov=orphans --cov-report=html tests`
 - Refresh lockfile: `uv lock`
+- h5py: resolves via a prebuilt PyPI wheel (3.16.0, cp311 manylinux) — no HDF5 source build needed. If a future h5py has no wheel for the target interpreter, build it against conda HDF5 headers+libs (the original `environment.yml` conda setup handles this), so keep that as a fallback.
 - Note: `pytest`/`--cov` are dev-only, not core deps; use `uv run` so the resolved interpreter is picked up.
+
+## Git Workflow
+- Always `git branch --show-current` before committing/pushing.
+- `git push` with no branch argument pushes the **current** branch (currently `main`). Specify the branch explicitly to avoid landing on `main`.
 
 ## Data Files
 - `sed_Fnu_grb_0.txt`: Example GRB spectrum energy density
