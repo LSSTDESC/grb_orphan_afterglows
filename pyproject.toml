@@ -35,6 +35,7 @@ dependencies = [
     "getdist",
     "iminuit",
     "ipython",
+    "jetsimpy @ git+https://github.com/haowang-astro/jetsimpy.git",
 ]
 version = "v1-rc1"
 
@@ -42,11 +43,6 @@ version = "v1-rc1"
 rubin = [
     "rubin_sim>=2.6.0",
 ]
-# jetsimpy is OPTIONAL for now: it is not available on PyPI or conda.
-# When the source is available, re-enable it (git/path editable), e.g.:
-#   jetsimpy = [
-#       "jetsimpy @ git+https://gitlab.in2p3.fr/.../FINK.git#subdirectory=jetsimpy",
-#   ]
 
 [dependency-groups]
 dev = [

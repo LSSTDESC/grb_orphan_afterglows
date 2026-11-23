@@ -57,7 +57,8 @@ Scientific project studying Gamma-ray Burst (GRB) orphan afterglows using Rubin 
 A uv-managed Python 3.11 environment is used for reproducibility (`uv.lock`, 199 packages).
 - Create/activate: `uv venv -p 3.11 .venv` (add `.venv` to `.gitignore`).
 - Install package + deps: `uv pip install -e .`
-- Optional extras: `uv pip install --extra rubin` (rubin_sim). `jetsimpy` is optional and unavailable on PyPI/conda; add it manually when source exists (see `[project.optional-dependencies]` in `pyproject.toml`).
+- Optional extras: `uv pip install --extra rubin` (rubin_sim).
+  - `jetsimpy` is a **required** dependency installed from git at build time (pybind11 C++ extension, needs gcc); pinned in `uv.lock` (see `[project.dependencies]`).
 - Dev tooling: `uv pip install --group dev` (pytest, pytest-cov, pylint, sphinx, jupyterlab).
 - Run tests: `uv run --python .venv/bin/python python -m pytest --cov=orphans --cov-report=html tests`
 - Refresh lockfile: `uv lock`
