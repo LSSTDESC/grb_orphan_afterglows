@@ -48,9 +48,20 @@ Scientific project studying Gamma-ray Burst (GRB) orphan afterglows using Rubin 
 
 ## Development Commands
 - Install package: `pip install -e .`
-- Run tests: `python -m pytest tests/`
+- Run tests: `eval "$(/home/bregeon/Soft/conda/bin/conda shell.bash hook)"; conda activate orphans; python -m pytest --cov=orphans --cov-report=html tests`
+  - Note: the `conda activate` must be on the same line as pytest, as it does not persist across separate shells.
 - Run linting: `./pylint.sh`
 - Generate docs: `cd docs && make html`
+
+## Virtual Environment (uv)
+A uv-managed Python 3.11 environment is used for reproducibility (`uv.lock`, 199 packages).
+- Create/activate: `uv venv -p 3.11 .venv` (add `.venv` to `.gitignore`).
+- Install package + deps: `uv pip install -e .`
+- Optional extras: `uv pip install --extra rubin` (rubin_sim). `jetsimpy` is optional and unavailable on PyPI/conda; add it manually when source exists (see `[project.optional-dependencies]` in `pyproject.toml`).
+- Dev tooling: `uv pip install --group dev` (pytest, pytest-cov, pylint, sphinx, jupyterlab).
+- Run tests: `uv run --python .venv/bin/python python -m pytest --cov=orphans --cov-report=html tests`
+- Refresh lockfile: `uv lock`
+- Note: `pytest`/`--cov` are dev-only, not core deps; use `uv run` so the resolved interpreter is picked up.
 
 ## Data Files
 - `sed_Fnu_grb_0.txt`: Example GRB spectrum energy density
